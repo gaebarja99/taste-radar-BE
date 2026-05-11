@@ -55,11 +55,23 @@ public class JwtTokenProvider {
 		}
 	}
 
+	public boolean isRefreshToken(String token) {
+		return "refresh".equals(parseClaims(token).get("typ", String.class));
+	}
+
 	public long getUserId(String token) {
 		return Long.parseLong(parseClaims(token).getSubject());
 	}
 
 	public String getRole(String token) {
+		return parseClaims(token).get("role", String.class);
+	}
+
+	/**
+	 * Refresh 토큰에는 role 클레임이 없을 수 있어서, access 재발급 시엔 null을 허용합니다.
+	 * (추후 DB에서 role 조회로 바꾸는 것을 권장)
+	 */
+	public String getRoleOrNull(String token) {
 		return parseClaims(token).get("role", String.class);
 	}
 
