@@ -8,6 +8,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -21,7 +22,14 @@ import org.hibernate.annotations.SQLRestriction;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "menus")
+@Table(
+		name = "menus",
+		indexes = {
+				@Index(name = "idx_menus_store_id", columnList = "store_id"),
+				@Index(name = "idx_menus_name", columnList = "name"),
+				@Index(name = "idx_menus_is_deleted", columnList = "is_deleted")
+		}
+)
 @SQLDelete(sql = "UPDATE menus SET is_deleted = true WHERE id = ?")
 @SQLRestriction("is_deleted = false")
 public class Menu extends BaseTimeEntity {
@@ -33,9 +41,6 @@ public class Menu extends BaseTimeEntity {
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "store_id", nullable = false)
 	private Store store;
-
-	@Column(name = "category_name", nullable = false)
-	private String categoryName;
 
 	@Column(nullable = false)
 	private String name;
