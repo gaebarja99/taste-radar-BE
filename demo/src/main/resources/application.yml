@@ -7,7 +7,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/taste_radar?characterEncoding=UTF-8&serverTimezone=Asia/Seoul
     username: root
-    password:
+    password: 1234
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
@@ -22,13 +22,15 @@ spring:
     redis:
       host: localhost
       port: 6379
+  # 카카오 로그인: https://developers.kakao.com — Redirect URI = {baseUrl}/login/oauth2/code/kakao
+  # 브라우저에서 시작: GET /oauth2/authorization/kakao → 로그인 후 JSON으로 accessToken·refreshToken 반환
   security:
     oauth2:
       client:
         registration:
           kakao:
-            client-id: ${KAKAO_CLIENT_ID:}
-            client-secret: ${KAKAO_CLIENT_SECRET:}
+            client-id: 99fa6367f556d5862c3e1faeefc5c3f3
+            client-secret: 4fDkYhzGTChhA94A25wJe0zEGRr0DyDv
             client-authentication-method: client_secret_post
             authorization-grant-type: authorization_code
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"

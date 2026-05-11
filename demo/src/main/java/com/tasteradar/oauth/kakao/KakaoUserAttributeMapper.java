@@ -34,9 +34,10 @@ public final class KakaoUserAttributeMapper {
 
 	private static String textOrNull(JsonNode parent, String field) {
 		JsonNode n = parent.path(field);
-		return n.isMissingNode() || n.isNull() || !n.isString() ? null : n.asString();
+		return n.isMissingNode() || n.isNull() || !n.isTextual() ? null : n.asText();
 	}
 
+	@SuppressWarnings("unchecked")
 	public static KakaoUserProfile fromAttributeMap(Map<String, Object> attributes) {
 		Object idObj = attributes.get("id");
 		long kakaoId = idObj instanceof Number n ? n.longValue() : Long.parseLong(String.valueOf(idObj));

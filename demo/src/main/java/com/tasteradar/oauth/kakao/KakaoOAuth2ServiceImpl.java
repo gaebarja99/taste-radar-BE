@@ -9,8 +9,7 @@ import tools.jackson.databind.json.JsonMapper;
 
 /**
  * 카카오에서 발급한 액세스 토큰으로 사용자 정보를 조회합니다.
- * (모바일 SDK 등에서 직접 토큰을 넘기는 REST API용. 브라우저 OAuth2 로그인은 Spring이
- * {@link org.springframework.security.oauth2.core.user.OAuth2User}로 처리합니다.)
+ * (모바일 SDK 등에서 직접 토큰을 넘기는 REST API용. 브라우저 OAuth2 로그인은 Spring이 {@link OAuth2User}로 처리합니다.)
  */
 @Service
 @RequiredArgsConstructor
