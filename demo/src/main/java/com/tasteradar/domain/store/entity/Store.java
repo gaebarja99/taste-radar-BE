@@ -18,18 +18,28 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Index;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.SQLDelete;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "stores")
+@SQLDelete(sql = "UPDATE stores SET is_deleted = true WHERE id = ?")
+@Table(
+		name = "stores",
+		indexes = {
+				@Index(name = "idx_stores_name", columnList = "name"),
+				@Index(name = "idx_stores_user_id", columnList = "user_id"),
+				@Index(name = "idx_stores_is_deleted", columnList = "is_deleted")
+		}
+)
 public class Store extends BaseTimeEntity {
 
 	@Id
@@ -39,6 +49,9 @@ public class Store extends BaseTimeEntity {
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "user_id", nullable = false)
 	private User owner;
+
+	@Column(nullable = false, length = 50)
+	private String name;
 
 	@Column(name = "adress", nullable = false)
 	private String address;
@@ -52,6 +65,9 @@ public class Store extends BaseTimeEntity {
 	@Enumerated(EnumType.STRING)
 	@Column(name = "store_status", nullable = false, length = 32)
 	private StoreStatus storeStatus;
+
+	@Column(name = "is_deleted", nullable = false)
+	private boolean isDeleted;
 
 	@Column(name = "open_time", nullable = false)
 	private LocalTime openTime;
