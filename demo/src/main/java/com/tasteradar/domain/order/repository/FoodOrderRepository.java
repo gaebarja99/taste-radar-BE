@@ -20,7 +20,20 @@ public interface FoodOrderRepository extends JpaRepository<FoodOrder, Long> {
 	@Query("select count(o) from FoodOrder o where o.store.owner.id = :ownerId and o.createdAt >= :start and o.createdAt < :end")
 	long countTodayByOwner(@Param("ownerId") long ownerId, @Param("start") Instant start, @Param("end") Instant end);
 
-	@Query("select new com.tasteradar.domain.order.api.dto.StoreOrderStatDto(s.id, s.name, count(o)) from FoodOrder o join o.store s where s.owner.id = :ownerId and o.createdAt >= :start and o.createdAt < :end group by s.id, s.name")
+	/**
+	 * 사장의 가게 전체를 기준으로 오늘 주문 수를 집계합니다.
+	 * - 오늘 주문이 0건인 가게도 count=0 으로 함께 반환되도록 상관 서브쿼리 사용.
+	 *   (Hibernate 6 환경에서 ad-hoc LEFT JOIN 처리 차이를 회피)
+	 * - 삭제된 가게는 제외.
+	 */
+	@Query("select new com.tasteradar.domain.order.api.dto.StoreOrderStatDto(" +
+			"   s.id, s.name, " +
+			"   (select count(o) from FoodOrder o " +
+			"      where o.store = s and o.createdAt >= :start and o.createdAt < :end)" +
+			") " +
+			"from com.tasteradar.domain.store.entity.Store s " +
+			"where s.owner.id = :ownerId and s.isDeleted = false " +
+			"order by s.id asc")
 	List<StoreOrderStatDto> countTodayGroupedByStore(@Param("ownerId") long ownerId, @Param("start") Instant start, @Param("end") Instant end);
 }
 
