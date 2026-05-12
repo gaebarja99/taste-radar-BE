@@ -9,6 +9,8 @@ import com.tasteradar.global.entity.BaseTimeEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -55,8 +57,9 @@ public class FoodOrder extends BaseTimeEntity {
 	@Column(name = "address_detail", nullable = false)
 	private String addressDetail;
 
+	@Enumerated(EnumType.STRING)
 	@Column(name = "order_status", nullable = false)
-	private String orderStatus;
+	private OrderStatus orderStatus;
 
 	@Column(name = "rejection_reason")
 	private String rejectionReason;

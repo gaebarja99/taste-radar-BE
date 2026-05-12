@@ -55,12 +55,16 @@ public class JwtTokenProvider {
 		}
 	}
 
-	public boolean isRefreshToken(String token) {
-		return "refresh".equals(parseClaims(token).get("typ", String.class));
-	}
-
 	public long getUserId(String token) {
 		return Long.parseLong(parseClaims(token).getSubject());
+	}
+
+	/** {@link #createRefreshToken(long)} 에서 {@code typ=refresh} 클레임으로 구분 */
+	public boolean isRefreshToken(String token) {
+		if (!validateToken(token)) {
+			return false;
+		}
+		return "refresh".equals(parseClaims(token).get("typ", String.class));
 	}
 
 	public String getRole(String token) {
