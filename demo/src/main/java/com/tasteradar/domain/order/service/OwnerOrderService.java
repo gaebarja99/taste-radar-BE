@@ -1,6 +1,7 @@
 package com.tasteradar.domain.order.service;
 
 import com.tasteradar.domain.order.api.dto.OrderActionResponse;
+import com.tasteradar.domain.order.api.dto.OrderSummaryResponse;
 import com.tasteradar.domain.order.api.dto.OwnerOrderStatusPatchRequest;
 import com.tasteradar.domain.order.api.dto.OwnerRejectRequest;
 import com.tasteradar.domain.order.api.dto.StoreOrderStatDto;
@@ -13,6 +14,8 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -72,6 +75,23 @@ public class OwnerOrderService {
 	public List<StoreOrderStatDto> statsTodayByStore(long ownerId) {
 		InstantRange r = todaySeoulRange();
 		return foodOrderRepository.countTodayGroupedByStore(ownerId, r.start(), r.end());
+	}
+
+	/**
+	 * 사장 본인 가게의 주문 목록.
+	 * @param storeId null 이면 전체 가게
+	 * @param status  null 이면 전체 상태
+	 */
+	@Transactional(readOnly = true)
+	public Page<OrderSummaryResponse> listOrders(long ownerId, Long storeId, OrderStatus status, Pageable pageable) {
+		return foodOrderRepository.findOwnerOrders(ownerId, storeId, status, pageable)
+				.map(o -> new OrderSummaryResponse(
+						o.getId(),
+						o.getStore().getName(),
+						o.getOrderStatus(),
+						o.getTotalAmount(),
+						o.getCreatedAt()
+				));
 	}
 
 	private FoodOrder loadForOwner(long ownerId, long orderId) {

@@ -1,14 +1,19 @@
 package com.tasteradar.domain.order.api;
 
 import com.tasteradar.domain.order.api.dto.OrderActionResponse;
+import com.tasteradar.domain.order.api.dto.OrderSummaryResponse;
 import com.tasteradar.domain.order.api.dto.OwnerOrderStatusPatchRequest;
 import com.tasteradar.domain.order.api.dto.OwnerRejectRequest;
 import com.tasteradar.domain.order.api.dto.StoreOrderStatDto;
 import com.tasteradar.domain.order.api.dto.TodayOrderCountResponse;
+import com.tasteradar.domain.order.entity.OrderStatus;
 import com.tasteradar.domain.order.service.OwnerOrderService;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -16,6 +21,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -46,6 +52,18 @@ public class OwnerOrderController {
 			@Valid @RequestBody OwnerOrderStatusPatchRequest request
 	) {
 		return ownerOrderService.patchStatus(parseUserId(authentication), orderId, request);
+	}
+
+	@GetMapping
+	public Page<OrderSummaryResponse> listOrders(
+			Authentication authentication,
+			@RequestParam(value = "storeId", required = false) Long storeId,
+			@RequestParam(value = "status",  required = false) OrderStatus status,
+			@RequestParam(value = "page",    defaultValue = "0")  int page,
+			@RequestParam(value = "size",    defaultValue = "20") int size
+	) {
+		Pageable pageable = PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 100));
+		return ownerOrderService.listOrders(parseUserId(authentication), storeId, status, pageable);
 	}
 
 	@GetMapping("/stats/today")

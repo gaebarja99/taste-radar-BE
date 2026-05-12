@@ -2,6 +2,7 @@ package com.tasteradar.domain.order.repository;
 
 import com.tasteradar.domain.order.api.dto.StoreOrderStatDto;
 import com.tasteradar.domain.order.entity.FoodOrder;
+import com.tasteradar.domain.order.entity.OrderStatus;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -19,6 +20,21 @@ public interface FoodOrderRepository extends JpaRepository<FoodOrder, Long> {
 
 	@Query("select count(o) from FoodOrder o where o.store.owner.id = :ownerId and o.createdAt >= :start and o.createdAt < :end")
 	long countTodayByOwner(@Param("ownerId") long ownerId, @Param("start") Instant start, @Param("end") Instant end);
+
+	/**
+	 * 사장의 주문 목록 조회. storeId, status 는 null 이면 필터링하지 않음.
+	 */
+	@Query("select o from FoodOrder o " +
+			"where o.store.owner.id = :ownerId " +
+			"  and (:storeId is null or o.store.id = :storeId) " +
+			"  and (:status  is null or o.orderStatus = :status) " +
+			"order by o.createdAt desc")
+	Page<FoodOrder> findOwnerOrders(
+			@Param("ownerId") long ownerId,
+			@Param("storeId") Long storeId,
+			@Param("status") OrderStatus status,
+			Pageable pageable
+	);
 
 	/**
 	 * 사장의 가게 전체를 기준으로 오늘 주문 수를 집계합니다.
