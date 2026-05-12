@@ -2,6 +2,7 @@ package com.tasteradar.security.config;
 
 import com.tasteradar.oauth.kakao.KakaoOAuth2LoginSuccessHandler;
 import com.tasteradar.security.filter.JwtAuthenticationFilter;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -9,12 +10,15 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -39,9 +43,23 @@ public class SecurityConfig {
 		if (test) {
 			http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
 		} else {
+			RequestMatcher apiMatcher = request -> request.getRequestURI().startsWith("/api/");
 			http
 					.oauth2Login(oauth2 -> oauth2
 							.successHandler(kakaoOAuth2LoginSuccessHandler))
+					.exceptionHandling(eh -> eh
+							// /api/** 의 미인증 요청은 OAuth 리다이렉트 대신 401 JSON 응답
+							.defaultAuthenticationEntryPointFor(
+									new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
+									apiMatcher)
+							// /api/** 의 권한 부족은 403 응답
+							.accessDeniedHandler((request, response, ex) -> {
+								if (request.getRequestURI().startsWith("/api/")) {
+									response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+								} else {
+									response.sendError(HttpServletResponse.SC_FORBIDDEN);
+								}
+							}))
 					.authorizeHttpRequests(auth -> auth
 							.requestMatchers("/oauth2/**", "/login/oauth2/**", "/error",
 									"/api/auth/refresh", "/api/auth/kakao/**").permitAll()
