@@ -43,7 +43,8 @@ public class SecurityConfig {
 					.oauth2Login(oauth2 -> oauth2
 							.successHandler(kakaoOAuth2LoginSuccessHandler))
 					.authorizeHttpRequests(auth -> auth
-							.requestMatchers("/oauth2/**", "/login/oauth2/**", "/error", "/api/auth/refresh").permitAll()
+							.requestMatchers("/oauth2/**", "/login/oauth2/**", "/error",
+									"/api/auth/refresh", "/api/auth/kakao/**").permitAll()
 							.requestMatchers(HttpMethod.GET, "/api/stores/**").permitAll()
 							.requestMatchers("/api/owner/**").hasRole("OWNER")
 							.requestMatchers("/api/cart/**").hasRole("CUSTOMER")
