@@ -1,6 +1,7 @@
 package com.tasteradar.domain.store.service;
 
 import com.tasteradar.domain.store.api.dto.OwnerStoreCreateRequest;
+import com.tasteradar.domain.store.api.dto.OwnerStoreUpdateRequest;
 import com.tasteradar.domain.store.api.dto.StoreStatusPatchRequest;
 import com.tasteradar.domain.store.entity.Store;
 import com.tasteradar.domain.store.entity.StoreImage;
@@ -49,6 +50,37 @@ public class OwnerStoreService {
 			store.getImages().add(si);
 		}
 		return storeRepository.save(store);
+	}
+
+	@Transactional
+	public Store update(long ownerId, long storeId, OwnerStoreUpdateRequest request) {
+		Store store = storeRepository.findByIdAndOwner_Id(storeId, ownerId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Store not found"));
+		if (store.isDeleted()) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Store not found");
+		}
+		store.setName(request.name());
+		store.setAddress(request.address());
+		store.setAddressDetail(request.addressDetail());
+		store.setMinOrderAmount(request.minOrderAmount());
+		store.setOpenTime(LocalTime.parse(request.openTime()));
+		store.setCloseTime(LocalTime.parse(request.closeTime()));
+		store.setRequiredTimeMinutes(request.requiredTimeMinutes());
+		store.setLatitude(request.latitude());
+		store.setLongitude(request.longitude());
+
+		if (request.images() != null && !request.images().isEmpty()) {
+			store.getImages().clear();
+			for (OwnerStoreCreateRequest.OwnerStoreImageRequest img : request.images()) {
+				StoreImage si = new StoreImage();
+				si.setStore(store);
+				si.setFileName(img.fileName());
+				si.setImgUrl(img.imgUrl());
+				si.setImgKey(img.imgKey());
+				store.getImages().add(si);
+			}
+		}
+		return store;
 	}
 
 	@Transactional
