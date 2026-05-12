@@ -35,7 +35,10 @@ public class StoreController {
 		return storeService.search(query, pageable);
 	}
 
-	/** 위치 기반 조회는 추후 구현 — 빈 페이지 반환 */
+	/**
+	 * 내 주변 가게 조회 — Haversine 기반 반경 검색.
+	 * - 좌표가 없는 가게는 자동 제외 (가게 등록 시 latitude/longitude 가 함께 저장되어야 노출됩니다)
+	 */
 	@GetMapping("/nearby")
 	public Page<StoreSummaryResponse> nearby(
 			@RequestParam double lat,
@@ -43,7 +46,7 @@ public class StoreController {
 			@RequestParam(defaultValue = "3") double radiusKm,
 			@PageableDefault(size = 20) Pageable pageable
 	) {
-		return Page.empty(pageable);
+		return storeService.nearby(lat, lng, radiusKm, pageable);
 	}
 
 	@GetMapping("/{storeId}/reviews")

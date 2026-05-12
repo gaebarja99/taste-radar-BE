@@ -32,6 +32,17 @@ public class StoreService {
 				.map(this::toSummary);
 	}
 
+	/**
+	 * 내 주변(반경 km) 가게 조회.
+	 * Haversine 공식 기반 native query를 사용하며, 좌표가 없는 가게는 자동 제외됩니다.
+	 */
+	@Transactional(readOnly = true)
+	public Page<StoreSummaryResponse> nearby(double lat, double lng, double radiusKm, Pageable pageable) {
+		double radius = Math.max(0.1, Math.min(radiusKm, 50.0));
+		return storeRepository.findNearby(lat, lng, radius, pageable)
+				.map(this::toSummary);
+	}
+
 	@Transactional(readOnly = true)
 	public StoreDetailResponse getPublicDetail(long storeId) {
 		Store s = storeRepository.findById(storeId)
@@ -78,7 +89,9 @@ public class StoreService {
 				s.getMinOrderAmount(),
 				s.getAverageRating(),
 				s.getReviewCount(),
-				thumbnail
+				thumbnail,
+				s.getLatitude(),
+				s.getLongitude()
 		);
 	}
 }
