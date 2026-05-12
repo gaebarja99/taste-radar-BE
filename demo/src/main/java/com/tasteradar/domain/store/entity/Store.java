@@ -37,7 +37,8 @@ import org.hibernate.annotations.SQLDelete;
 		indexes = {
 				@Index(name = "idx_stores_name", columnList = "name"),
 				@Index(name = "idx_stores_user_id", columnList = "user_id"),
-				@Index(name = "idx_stores_is_deleted", columnList = "is_deleted")
+				@Index(name = "idx_stores_is_deleted", columnList = "is_deleted"),
+				@Index(name = "idx_stores_geo", columnList = "latitude, longitude")
 		}
 )
 public class Store extends BaseTimeEntity {
@@ -58,6 +59,12 @@ public class Store extends BaseTimeEntity {
 
 	@Column(name = "address_detail", nullable = false)
 	private String addressDetail;
+
+	@Column(name = "latitude")
+	private Double latitude;
+
+	@Column(name = "longitude")
+	private Double longitude;
 
 	@Column(name = "min_order_amount", nullable = false)
 	private int minOrderAmount;

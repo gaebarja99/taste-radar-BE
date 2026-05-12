@@ -15,6 +15,8 @@ public record OwnerStoreCreateRequest(
 		@NotBlank String openTime,
 		@NotBlank String closeTime,
 		@NotNull @Positive int requiredTimeMinutes,
+		Double latitude,
+		Double longitude,
 		@Valid @NotEmpty List<OwnerStoreImageRequest> images
 ) {
 	public record OwnerStoreImageRequest(

@@ -9,7 +9,8 @@ public record StoreSummaryResponse(
 		int minOrderAmount,
 		double averageRating,
 		long reviewCount,
-		String thumbnailUrl
+		String thumbnailUrl,
+		Double latitude,
+		Double longitude
 ) {
 }
-

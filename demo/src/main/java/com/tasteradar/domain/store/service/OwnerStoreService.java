@@ -30,6 +30,8 @@ public class OwnerStoreService {
 		store.setName(request.name());
 		store.setAddress(request.address());
 		store.setAddressDetail(request.addressDetail());
+		store.setLatitude(request.latitude());
+		store.setLongitude(request.longitude());
 		store.setMinOrderAmount(request.minOrderAmount());
 		store.setOpenTime(LocalTime.parse(request.openTime()));
 		store.setCloseTime(LocalTime.parse(request.closeTime()));
