@@ -52,3 +52,7 @@ jwt:
 
 server:
   port: 8080
+
+# 카카오 로그인 성공 후 프론트엔드 콜백 페이지(토큰을 fragment(#)로 전달)
+app:
+  oauth-success-redirect: http://localhost:5173/pages/auth/callback.html
