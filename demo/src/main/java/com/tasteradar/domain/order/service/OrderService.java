@@ -9,6 +9,7 @@ import com.tasteradar.domain.order.entity.FoodOrder;
 import com.tasteradar.domain.order.entity.OrderItem;
 import com.tasteradar.domain.order.entity.OrderStatus;
 import com.tasteradar.domain.order.repository.FoodOrderRepository;
+import com.tasteradar.domain.user.entity.UserRole;
 import com.tasteradar.domain.user.repository.UserRepository;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -84,9 +85,12 @@ public class OrderService {
 	}
 
 	@Transactional(readOnly = true)
-	public OrderDetailResponse detail(long userId, long orderId) {
-		FoodOrder order = foodOrderRepository.findByIdAndUser_Id(orderId, userId)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found"));
+	public OrderDetailResponse detail(long userId, UserRole role, long orderId) {
+		FoodOrder order = (role == UserRole.OWNER)
+				? foodOrderRepository.findByIdAndStore_Owner_Id(orderId, userId)
+						.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found"))
+				: foodOrderRepository.findByIdAndUser_Id(orderId, userId)
+						.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found"));
 		return toDetail(order);
 	}
 

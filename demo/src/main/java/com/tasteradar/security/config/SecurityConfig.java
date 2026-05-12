@@ -67,6 +67,7 @@ public class SecurityConfig {
 							.requestMatchers("/api/owner/**").hasRole("OWNER")
 							.requestMatchers("/api/cart/**").hasRole("CUSTOMER")
 							.requestMatchers(HttpMethod.PUT, "/api/users/me/tastes").hasRole("CUSTOMER")
+							.requestMatchers(HttpMethod.GET, "/api/orders/{orderId:[0-9]+}").hasAnyRole("CUSTOMER", "OWNER")
 							.requestMatchers("/api/orders/**").hasRole("CUSTOMER")
 							.requestMatchers(HttpMethod.GET, "/api/reviews/me").hasRole("CUSTOMER")
 							.requestMatchers(HttpMethod.PUT, "/api/reviews/**").hasRole("CUSTOMER")

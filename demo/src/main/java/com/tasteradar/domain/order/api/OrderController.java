@@ -4,6 +4,7 @@ import com.tasteradar.domain.order.api.dto.OrderCreateRequest;
 import com.tasteradar.domain.order.api.dto.OrderDetailResponse;
 import com.tasteradar.domain.order.api.dto.OrderSummaryResponse;
 import com.tasteradar.domain.order.service.OrderService;
+import com.tasteradar.domain.user.entity.UserRole;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -41,7 +42,7 @@ public class OrderController {
 
 	@GetMapping("/{orderId}")
 	public OrderDetailResponse detail(Authentication authentication, @PathVariable long orderId) {
-		return orderService.detail(parseUserId(authentication), orderId);
+		return orderService.detail(parseUserId(authentication), parseUserRole(authentication), orderId);
 	}
 
 	@PostMapping("/{orderId}/cancel")
@@ -56,5 +57,11 @@ public class OrderController {
 			return n.longValue();
 		}
 		return Long.parseLong(String.valueOf(principal));
+	}
+
+	private UserRole parseUserRole(Authentication authentication) {
+		boolean isOwner = authentication.getAuthorities().stream()
+				.anyMatch(a -> "ROLE_OWNER".equals(a.getAuthority()));
+		return isOwner ? UserRole.OWNER : UserRole.CUSTOMER;
 	}
 }

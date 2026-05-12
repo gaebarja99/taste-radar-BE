@@ -18,6 +18,9 @@ public interface FoodOrderRepository extends JpaRepository<FoodOrder, Long> {
 
 	Optional<FoodOrder> findByIdAndUser_Id(Long id, Long userId);
 
+	/** 사장 권한으로 단건 조회: 해당 주문 가게의 사장이 본인인 경우에만 반환 */
+	Optional<FoodOrder> findByIdAndStore_Owner_Id(Long id, Long ownerId);
+
 	@Query("select count(o) from FoodOrder o where o.store.owner.id = :ownerId and o.createdAt >= :start and o.createdAt < :end")
 	long countTodayByOwner(@Param("ownerId") long ownerId, @Param("start") Instant start, @Param("end") Instant end);
 
