@@ -55,10 +55,6 @@ public class JwtTokenProvider {
 		}
 	}
 
-	public boolean isRefreshToken(String token) {
-		return "refresh".equals(parseClaims(token).get("typ", String.class));
-	}
-
 	public long getUserId(String token) {
 		return Long.parseLong(parseClaims(token).getSubject());
 	}
