@@ -80,6 +80,7 @@ public class OrderService {
 						o.getStore().getName(),
 						o.getOrderStatus(),
 						o.getTotalAmount(),
+						o.getRejectionReason(),
 						o.getCreatedAt()
 				));
 	}

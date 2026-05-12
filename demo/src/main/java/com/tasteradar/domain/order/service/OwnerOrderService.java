@@ -90,6 +90,7 @@ public class OwnerOrderService {
 						o.getStore().getName(),
 						o.getOrderStatus(),
 						o.getTotalAmount(),
+						o.getRejectionReason(),
 						o.getCreatedAt()
 				));
 	}

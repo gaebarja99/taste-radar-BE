@@ -8,6 +8,7 @@ public record OrderSummaryResponse(
 		String storeName,
 		OrderStatus orderStatus,
 		int totalAmount,
+		String rejectionReason,
 		Instant createdAt
 ) {
 }
