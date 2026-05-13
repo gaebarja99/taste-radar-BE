@@ -4,6 +4,10 @@ spring:
   threads:
     virtual:
       enabled: true
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 10MB
   datasource:
     url: jdbc:mysql://localhost:3306/taste_radar?characterEncoding=UTF-8&serverTimezone=Asia/Seoul
     username: root
@@ -61,3 +65,8 @@ server:
 # 카카오 로그인 성공 후 프론트엔드 콜백 페이지(토큰을 fragment(#)로 전달)
 app:
   oauth-success-redirect: http://localhost:5173/pages/auth/callback.html
+  upload:
+    # 파일이 실제 저장될 디스크 경로 (상대/절대 모두 OK, 없으면 자동 생성)
+    dir: ${UPLOAD_DIR:./uploads}
+    # 업로드된 파일을 브라우저에서 열 때 사용할 공개 URL prefix
+    public-base-url: ${UPLOAD_PUBLIC_BASE_URL:http://localhost:8080/uploads}
