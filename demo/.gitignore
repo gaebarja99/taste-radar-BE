@@ -41,3 +41,8 @@ out/
 # Local file uploads (runtime-generated binaries; directory kept via .gitkeep)
 uploads/*
 !uploads/.gitkeep
+
+# DB scripts: demo/scripts/*.sql 는 커밋 (마이그레이션·공용 시드)
+# 개인/로컬 전용 시드만 제외
+scripts/local/
+scripts/**/*.local.sql
