@@ -13,6 +13,12 @@ public interface StoreRepository extends JpaRepository<Store, Long>, StoreSearch
 	Optional<Store> findByIdAndOwner_Id(Long id, Long ownerId);
 
 	/**
+	 * 본인이 소유한 모든 가게(소프트 삭제 포함). {@code Store} 엔티티에
+	 * {@code @SQLRestriction} 이 없기 때문에 폐업 처리(is_deleted=true)된 가게도 함께 반환된다.
+	 */
+	java.util.List<Store> findByOwner_IdOrderByIdAsc(Long ownerId);
+
+	/**
 	 * Haversine 공식(지구 반지름 6371km) 기반 반경 검색.
 	 * - 좌표가 NULL인 가게 / 삭제된 가게는 제외
 	 * - 결과는 거리 오름차순
