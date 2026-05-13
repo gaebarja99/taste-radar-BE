@@ -21,14 +21,23 @@ public class UserOAuthService {
 
 	/**
 	 * 카카오 프로필로 사용자 upsert.
-	 * 신규 가입자라면 {@code pendingRole}을 OWNER/CUSTOMER로 해석해 적용합니다.
-	 * 기존 사용자라면 역할은 변경하지 않습니다(위변조 방지).
+	 * <ul>
+	 *   <li>신규: {@code pendingRole} 쿠키(OWNER/CUSTOMER)로 역할 지정, 없으면 CUSTOMER.</li>
+	 *   <li>기존: 닉네임 갱신 + 소프트 삭제면 복구 + 로그인 진입 시 선택한 {@code pendingRole} 이 있으면 그 역할로 갱신
+	 *       (메인의 「고객/사장으로 시작」과 JWT 역할을 맞추기 위함).</li>
+	 * </ul>
 	 */
 	@Transactional
 	public User upsertKakaoUser(KakaoUserProfile profile, String pendingRole) {
-		return userRepository.findByEmail(profile.email())
+		return userRepository.findByEmailIncludingDeleted(profile.email())
 				.map(existing -> {
 					existing.setNickname(profile.nickname());
+					if (existing.isDeleted()) {
+						existing.setDeleted(false);
+					}
+					if (pendingRole != null && !pendingRole.isBlank()) {
+						existing.setRole(resolveRole(pendingRole));
+					}
 					return existing;
 				})
 				.orElseGet(() -> {

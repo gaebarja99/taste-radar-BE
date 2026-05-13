@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -23,9 +24,10 @@ import org.springframework.stereotype.Component;
  * 카카오 프로필로 사용자를 저장·갱신한 뒤, 발급한 JWT를 프론트 콜백 페이지의
  * URL fragment({@code #})에 담아 redirect 합니다. fragment는 서버로 전송되지 않아 토큰 노출이 적습니다.
  * <p>
- * 신규 가입자라면 {@link KakaoLoginStartController}에서 저장한 {@code pending_role} 쿠키 값을
- * 그대로 적용합니다. 기존 사용자라면 역할은 변경되지 않습니다.
+ * {@link KakaoLoginStartController}의 {@code pending_role} 쿠키가 있으면 신규·기존 모두 해당 역할로
+ * 맞춥니다(메인에서 「고객/사장으로 시작」 선택과 JWT 일치). 쿠키가 없으면 기존 사용자는 DB 역할 유지.
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class KakaoOAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
@@ -51,9 +53,11 @@ public class KakaoOAuth2LoginSuccessHandler implements AuthenticationSuccessHand
 		KakaoUserProfile profile = KakaoUserAttributeMapper.fromOAuth2User(oauth2User);
 
 		String pendingRole = readPendingRole(request);
+		log.info("[kakao-login] email={} pendingRoleCookie={}", profile.email(), pendingRole);
 		clearPendingRoleCookie(response);
 
 		User user = userOAuthService.upsertKakaoUser(profile, pendingRole);
+		log.info("[kakao-login] resolved userId={} email={} role={}", user.getId(), user.getEmail(), user.getRole());
 
 		String access = jwtTokenProvider.createAccessToken(user.getId(), user.getRole().name());
 		String refresh = jwtTokenProvider.createRefreshToken(user.getId());
