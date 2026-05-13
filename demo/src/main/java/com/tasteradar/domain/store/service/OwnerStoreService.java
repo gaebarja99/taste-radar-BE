@@ -96,7 +96,8 @@ public class OwnerStoreService {
 				s.getLatitude(),
 				s.getLongitude(),
 				images,
-				menus
+				menus,
+				null
 		);
 	}
 

@@ -5,10 +5,14 @@ import com.tasteradar.domain.store.api.dto.StoreDetailResponse;
 import com.tasteradar.domain.store.api.dto.StoreImageUrlResponse;
 import com.tasteradar.domain.store.api.dto.StoreMenuResponse;
 import com.tasteradar.domain.store.api.dto.StoreSummaryResponse;
+import com.tasteradar.domain.store.api.dto.StoreTasteHighlightResponse;
 import com.tasteradar.domain.store.entity.Store;
 import com.tasteradar.domain.store.repository.StoreRepository;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,11 +29,13 @@ public class StoreService {
 
 	private final StoreRepository storeRepository;
 	private final MenuRepository menuRepository;
+	private final StoreTasteService storeTasteService;
 
 	@Transactional(readOnly = true)
 	public Page<StoreSummaryResponse> search(String query, Pageable pageable) {
-		return storeRepository.searchByStoreNameOrMenuName(query, pageable)
-				.map(this::toSummary);
+		Page<Store> page = storeRepository.searchByStoreNameOrMenuName(query, pageable);
+		Map<Long, List<StoreTasteHighlightResponse>> highlights = loadHighlights(page.getContent());
+		return page.map(store -> toSummary(store, highlights));
 	}
 
 	/**
@@ -39,8 +45,9 @@ public class StoreService {
 	@Transactional(readOnly = true)
 	public Page<StoreSummaryResponse> nearby(double lat, double lng, double radiusKm, Pageable pageable) {
 		double radius = Math.max(0.1, Math.min(radiusKm, 50.0));
-		return storeRepository.findNearby(lat, lng, radius, pageable)
-				.map(this::toSummary);
+		Page<Store> page = storeRepository.findNearby(lat, lng, radius, pageable);
+		Map<Long, List<StoreTasteHighlightResponse>> highlights = loadHighlights(page.getContent());
+		return page.map(store -> toSummary(store, highlights));
 	}
 
 	@Transactional(readOnly = true)
@@ -77,11 +84,21 @@ public class StoreService {
 				s.getLatitude(),
 				s.getLongitude(),
 				images,
-				menus
+				menus,
+				storeTasteService.getProfile(storeId, s.getReviewCount())
 		);
 	}
 
-	private StoreSummaryResponse toSummary(Store s) {
+	private Map<Long, List<StoreTasteHighlightResponse>> loadHighlights(List<Store> stores) {
+		if (stores.isEmpty()) {
+			return Map.of();
+		}
+		Map<Long, Long> reviewCounts = stores.stream()
+				.collect(Collectors.toMap(Store::getId, Store::getReviewCount));
+		return storeTasteService.getHighlightsBatch(reviewCounts);
+	}
+
+	private StoreSummaryResponse toSummary(Store s, Map<Long, List<StoreTasteHighlightResponse>> highlights) {
 		String thumbnail = Optional.ofNullable(s.getImages())
 				.flatMap(images -> images.stream().findFirst())
 				.map(img -> img.getImgUrl())
@@ -95,7 +112,8 @@ public class StoreService {
 				s.getReviewCount(),
 				thumbnail,
 				s.getLatitude(),
-				s.getLongitude()
+				s.getLongitude(),
+				highlights.getOrDefault(s.getId(), List.of())
 		);
 	}
 }

@@ -1,6 +1,7 @@
 package com.tasteradar.domain.store.api.dto;
 
 import com.tasteradar.domain.store.entity.StoreStatus;
+import java.util.List;
 
 public record StoreSummaryResponse(
 		long id,
@@ -11,6 +12,7 @@ public record StoreSummaryResponse(
 		long reviewCount,
 		String thumbnailUrl,
 		Double latitude,
-		Double longitude
+		Double longitude,
+		List<StoreTasteHighlightResponse> tasteHighlights
 ) {
 }

@@ -18,6 +18,7 @@ public record StoreDetailResponse(
 		Double latitude,
 		Double longitude,
 		List<StoreImageUrlResponse> images,
-		List<StoreMenuResponse> menus
+		List<StoreMenuResponse> menus,
+		StoreTasteProfileResponse tasteProfile
 ) {
 }
