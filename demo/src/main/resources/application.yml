@@ -2,7 +2,9 @@ spring:
   application:
     name: taste-radar-be
   config:
-    import: optional:file:.env[.properties]
+    import:
+      - optional:file:.env[.properties]
+      - optional:file:demo/.env[.properties]
   threads:
     virtual:
       enabled: true
@@ -73,6 +75,10 @@ server:
 # 카카오 로그인 성공 후 프론트엔드 콜백 페이지(토큰을 fragment(#)로 전달)
 app:
   oauth-success-redirect: http://localhost:5173/pages/auth/callback.html
+  ai:
+    gemini-api-key: ${GEMINI_API_KEY:}
+    model: ${GEMINI_MODEL:gemini-2.5-flash-lite}
+    fallback-models: ${GEMINI_FALLBACK_MODELS:gemini-2.5-flash-lite,gemini-2.5-flash}
   upload:
     # 파일이 실제 저장될 디스크 경로 (상대/절대 모두 OK, 없으면 자동 생성)
     dir: ${UPLOAD_DIR:./uploads}
