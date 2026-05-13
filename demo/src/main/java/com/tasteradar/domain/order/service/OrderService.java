@@ -75,14 +75,7 @@ public class OrderService {
 	@Transactional(readOnly = true)
 	public Page<OrderSummaryResponse> myOrders(long userId, Pageable pageable) {
 		return foodOrderRepository.findByUser_IdOrderByCreatedAtDesc(userId, pageable)
-				.map(o -> new OrderSummaryResponse(
-						o.getId(),
-						o.getStore().getName(),
-						o.getOrderStatus(),
-						o.getTotalAmount(),
-						o.getRejectionReason(),
-						o.getCreatedAt()
-				));
+				.map(OrderSummaryMapper::toSummary);
 	}
 
 	@Transactional(readOnly = true)

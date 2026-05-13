@@ -85,14 +85,7 @@ public class OwnerOrderService {
 	@Transactional(readOnly = true)
 	public Page<OrderSummaryResponse> listOrders(long ownerId, Long storeId, OrderStatus status, Pageable pageable) {
 		return foodOrderRepository.findOwnerOrders(ownerId, storeId, status, pageable)
-				.map(o -> new OrderSummaryResponse(
-						o.getId(),
-						o.getStore().getName(),
-						o.getOrderStatus(),
-						o.getTotalAmount(),
-						o.getRejectionReason(),
-						o.getCreatedAt()
-				));
+				.map(OrderSummaryMapper::toSummary);
 	}
 
 	private FoodOrder loadForOwner(long ownerId, long orderId) {

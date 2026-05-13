@@ -71,6 +71,7 @@ public class CartService {
 			ci.setQuantity(request.quantity());
 			cart.getItems().add(ci);
 		}
+		cartRepository.saveAndFlush(cart);
 		return toDto(cart);
 	}
 

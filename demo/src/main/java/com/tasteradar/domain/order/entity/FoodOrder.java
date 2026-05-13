@@ -25,6 +25,7 @@ import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.BatchSize;
 
 @Getter
 @Setter
@@ -68,6 +69,7 @@ public class FoodOrder extends BaseTimeEntity {
 	private int totalAmount;
 
 	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+	@BatchSize(size = 20)
 	private List<OrderItem> items = new ArrayList<>();
 
 	@OneToOne(mappedBy = "order", fetch = FetchType.LAZY)
