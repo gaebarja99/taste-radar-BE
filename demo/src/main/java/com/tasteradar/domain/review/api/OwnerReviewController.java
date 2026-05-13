@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,6 +29,18 @@ public class OwnerReviewController {
 			@Valid @RequestBody OwnerReplyRequest request
 	) {
 		reviewService.ownerReply(parseUserId(authentication), reviewId, request);
+	}
+
+	/**
+	 * 사장이 자기 가게의 리뷰를 삭제(소프트).
+	 */
+	@DeleteMapping("/{reviewId}")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void delete(
+			@PathVariable long reviewId,
+			Authentication authentication
+	) {
+		reviewService.deleteByOwner(parseUserId(authentication), reviewId);
 	}
 
 	private long parseUserId(Authentication authentication) {

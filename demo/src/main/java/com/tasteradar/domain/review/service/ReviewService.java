@@ -106,6 +106,22 @@ public class ReviewService {
 		r.setOwnerReply(request.ownerReply());
 	}
 
+	/**
+	 * 사장이 자기 가게의 리뷰를 (소프트) 삭제한다.
+	 * 삭제 후 가게 평점/리뷰 수를 재계산.
+	 */
+	@Transactional
+	public void deleteByOwner(long ownerId, long reviewId) {
+		Review r = reviewRepository.findById(reviewId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found"));
+		if (r.getOrder().getStore().getOwner().getId() != ownerId) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not your store review");
+		}
+		long storeId = r.getOrder().getStore().getId();
+		reviewRepository.delete(r);
+		refreshStoreReviewStats(storeId);
+	}
+
 	private void applyTaste(Review r, ReviewTasteDto t) {
 		r.setSweetness(t.sweetness());
 		r.setSaltiness(t.saltiness());
