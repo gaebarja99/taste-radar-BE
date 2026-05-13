@@ -30,8 +30,8 @@ public class MenuCommandService {
 		menu.setStore(store);
 		menu.setName(request.name());
 		menu.setPrice(request.price());
-		menu.setMenuDescription(request.menuDescription());
-		menu.setImageUrl(request.imageUrl());
+		menu.setMenuDescription(nullSafe(request.menuDescription()));
+		menu.setImageUrl(nullSafe(request.imageUrl()));
 		menu.setDeleted(false);
 		menuRepository.save(menu);
 		return toResponse(menu);
@@ -44,9 +44,13 @@ public class MenuCommandService {
 		assertOwner(menu, ownerId);
 		menu.setName(request.name());
 		menu.setPrice(request.price());
-		menu.setMenuDescription(request.menuDescription());
-		menu.setImageUrl(request.imageUrl());
+		menu.setMenuDescription(nullSafe(request.menuDescription()));
+		menu.setImageUrl(nullSafe(request.imageUrl()));
 		return toResponse(menu);
+	}
+
+	private String nullSafe(String s) {
+		return s == null ? "" : s.trim();
 	}
 
 	@Transactional
