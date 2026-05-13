@@ -11,6 +11,10 @@ final class OrderSummaryMapper {
 	}
 
 	static OrderSummaryResponse toSummary(FoodOrder order) {
+		return toSummary(order, false);
+	}
+
+	static OrderSummaryResponse toSummary(FoodOrder order, boolean hasReview) {
 		return new OrderSummaryResponse(
 				order.getId(),
 				order.getStore().getId(),
@@ -19,7 +23,8 @@ final class OrderSummaryMapper {
 				order.getOrderStatus(),
 				order.getTotalAmount(),
 				order.getRejectionReason(),
-				order.getCreatedAt()
+				order.getCreatedAt(),
+				hasReview
 		);
 	}
 

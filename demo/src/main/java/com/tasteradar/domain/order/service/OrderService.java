@@ -9,6 +9,9 @@ import com.tasteradar.domain.order.entity.FoodOrder;
 import com.tasteradar.domain.order.entity.OrderItem;
 import com.tasteradar.domain.order.entity.OrderStatus;
 import com.tasteradar.domain.order.repository.FoodOrderRepository;
+import com.tasteradar.domain.review.repository.ReviewRepository;
+import com.tasteradar.domain.payment.repository.PaymentRepository;
+import com.tasteradar.domain.payment.service.KakaoPayService;
 import com.tasteradar.domain.user.entity.UserRole;
 import com.tasteradar.domain.user.repository.UserRepository;
 import java.util.UUID;
@@ -27,6 +30,9 @@ public class OrderService {
 	private final FoodOrderRepository foodOrderRepository;
 	private final CartRepository cartRepository;
 	private final UserRepository userRepository;
+	private final PaymentRepository paymentRepository;
+	private final KakaoPayService kakaoPayService;
+	private final ReviewRepository reviewRepository;
 
 	@Transactional
 	public OrderDetailResponse create(long userId, OrderCreateRequest request) {
@@ -75,7 +81,10 @@ public class OrderService {
 	@Transactional(readOnly = true)
 	public Page<OrderSummaryResponse> myOrders(long userId, Pageable pageable) {
 		return foodOrderRepository.findByUser_IdOrderByCreatedAtDesc(userId, pageable)
-				.map(OrderSummaryMapper::toSummary);
+				.map(order -> OrderSummaryMapper.toSummary(
+						order,
+						reviewRepository.existsByOrder_Id(order.getId())
+				));
 	}
 
 	@Transactional(readOnly = true)
@@ -95,6 +104,12 @@ public class OrderService {
 		if (order.getOrderStatus() != OrderStatus.PENDING) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "Only PENDING orders can be cancelled");
 		}
+		paymentRepository.findByOrder_Id(orderId).ifPresent(payment -> {
+			if ("APPROVED".equals(payment.getStatus())) {
+				kakaoPayService.cancel(userId, orderId, "고객 주문 취소");
+			}
+			paymentRepository.delete(payment);
+		});
 		foodOrderRepository.delete(order);
 	}
 
