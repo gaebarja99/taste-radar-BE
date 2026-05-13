@@ -9,6 +9,7 @@ import com.tasteradar.domain.user.repository.UserRepository;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -18,8 +19,10 @@ import org.springframework.web.server.ResponseStatusException;
 public class UserProfileService {
 
 	private static final Pattern NICKNAME = Pattern.compile("^[가-힣a-zA-Z0-9]{2,10}$");
+	private static final Pattern PASSWORD = Pattern.compile("^(?=.*[A-Za-z])(?=.*\\d).{8,72}$");
 
 	private final UserRepository userRepository;
+	private final PasswordEncoder passwordEncoder;
 
 	@Transactional(readOnly = true)
 	public UserProfileResponse getMe(long userId) {
@@ -30,10 +33,41 @@ public class UserProfileService {
 	@Transactional
 	public UserProfileResponse updateNickname(long userId, String nickname) {
 		if (nickname == null || !NICKNAME.matcher(nickname).matches()) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid nickname");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "닉네임은 2~10자의 한글·영문·숫자만 사용할 수 있어요.");
 		}
 		User user = loadUser(userId);
 		user.setNickname(nickname);
+		return toResponse(user);
+	}
+
+	@Transactional
+	public UserProfileResponse updateAddress(long userId, String zipCode, String address, String addressDetail) {
+		if (zipCode == null || zipCode.isBlank() || address == null || address.isBlank()
+				|| addressDetail == null || addressDetail.isBlank()) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "배달 주소를 모두 입력해 주세요.");
+		}
+		User user = loadUser(userId);
+		user.setZipCode(zipCode.trim());
+		user.setAddress(address.trim());
+		user.setAddressDetail(addressDetail.trim());
+		return toResponse(user);
+	}
+
+	@Transactional
+	public UserProfileResponse updatePassword(long userId, String currentPassword, String newPassword) {
+		if (newPassword == null || !PASSWORD.matcher(newPassword).matches()) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "비밀번호는 8자 이상이며 영문과 숫자를 포함해야 해요.");
+		}
+		User user = loadUser(userId);
+		if (user.getPasswordHash() != null && !user.getPasswordHash().isBlank()) {
+			if (currentPassword == null || currentPassword.isBlank()) {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "현재 비밀번호를 입력해 주세요.");
+			}
+			if (!passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "현재 비밀번호가 일치하지 않아요.");
+			}
+		}
+		user.setPasswordHash(passwordEncoder.encode(newPassword));
 		return toResponse(user);
 	}
 
@@ -81,7 +115,11 @@ public class UserProfileService {
 				user.getEmail(),
 				user.getNickname(),
 				user.getRole().name(),
-				tastes
+				tastes,
+				user.getZipCode(),
+				user.getAddress(),
+				user.getAddressDetail(),
+				user.getPasswordHash() != null && !user.getPasswordHash().isBlank()
 		);
 	}
 }

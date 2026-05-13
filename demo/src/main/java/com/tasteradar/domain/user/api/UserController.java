@@ -1,6 +1,8 @@
 package com.tasteradar.domain.user.api;
 
+import com.tasteradar.domain.user.api.dto.AddressUpdateRequest;
 import com.tasteradar.domain.user.api.dto.NicknameUpdateRequest;
+import com.tasteradar.domain.user.api.dto.PasswordUpdateRequest;
 import com.tasteradar.domain.user.api.dto.TasteUpdateRequest;
 import com.tasteradar.domain.user.api.dto.UserProfileResponse;
 import com.tasteradar.domain.user.service.UserProfileService;
@@ -32,6 +34,23 @@ public class UserController {
 	@PatchMapping("/me/nickname")
 	public UserProfileResponse nickname(Authentication authentication, @Valid @RequestBody NicknameUpdateRequest request) {
 		return userProfileService.updateNickname(parseUserId(authentication), request.nickname());
+	}
+
+	@PutMapping("/me/address")
+	public UserProfileResponse address(Authentication authentication, @Valid @RequestBody AddressUpdateRequest request) {
+		return userProfileService.updateAddress(
+				parseUserId(authentication),
+				request.zipCode(),
+				request.address(),
+				request.addressDetail());
+	}
+
+	@PutMapping("/me/password")
+	public UserProfileResponse password(Authentication authentication, @Valid @RequestBody PasswordUpdateRequest request) {
+		return userProfileService.updatePassword(
+				parseUserId(authentication),
+				request.currentPassword(),
+				request.newPassword());
 	}
 
 	@PutMapping("/me/tastes")

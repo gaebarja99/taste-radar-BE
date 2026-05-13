@@ -60,6 +60,21 @@ public class User extends BaseTimeEntity {
 	@Column(name = "is_deleted", nullable = false)
 	private boolean isDeleted;
 
+	@Column(name = "password_hash", length = 100)
+	private String passwordHash;
+
+	@Size(max = 10)
+	@Column(name = "zip_code", length = 10)
+	private String zipCode;
+
+	@Size(max = 200)
+	@Column(length = 200)
+	private String address;
+
+	@Size(max = 100)
+	@Column(name = "address_detail", length = 100)
+	private String addressDetail;
+
 	@OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	private UserTastePreference tastePreference;
 
