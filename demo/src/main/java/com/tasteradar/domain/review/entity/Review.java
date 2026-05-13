@@ -52,17 +52,17 @@ public class Review extends BaseTimeEntity {
 	private String ownerReply;
 
 	@Column(nullable = false)
-	private int sweetness;
+	private boolean sweetness;
 
 	@Column(nullable = false)
-	private int saltiness;
+	private boolean saltiness;
 
 	@Column(nullable = false)
-	private int sourness;
+	private boolean sourness;
 
 	@Column(nullable = false)
-	private int bitterness;
+	private boolean bitterness;
 
 	@Column(nullable = false)
-	private int umami;
+	private boolean umami;
 }

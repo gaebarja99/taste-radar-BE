@@ -47,6 +47,7 @@ public class ReviewService {
 		r.setContent(request.content());
 		r.setDeleted(false);
 		applyTaste(r, request.taste());
+		validateTaste(request.taste());
 		reviewRepository.save(r);
 		refreshStoreReviewStats(order.getStore().getId());
 		return toMy(r);
@@ -83,6 +84,7 @@ public class ReviewService {
 		r.setRating(request.rating());
 		r.setContent(request.content());
 		applyTaste(r, request.taste());
+		validateTaste(request.taste());
 		refreshStoreReviewStats(r.getOrder().getStore().getId());
 		return toMy(r);
 	}
@@ -123,15 +125,27 @@ public class ReviewService {
 	}
 
 	private void applyTaste(Review r, ReviewTasteDto t) {
-		r.setSweetness(t.sweetness());
-		r.setSaltiness(t.saltiness());
-		r.setSourness(t.sourness());
-		r.setBitterness(t.bitterness());
+		r.setSweetness(t.sweet());
+		r.setSaltiness(t.salty());
+		r.setSourness(t.sour());
+		r.setBitterness(t.bitter());
 		r.setUmami(t.umami());
 	}
 
+	private void validateTaste(ReviewTasteDto t) {
+		if (!t.sweet() && !t.salty() && !t.sour() && !t.bitter() && !t.umami()) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "특화된 맛을 한 가지 이상 선택해 주세요.");
+		}
+	}
+
 	private MyReviewResponse toMy(Review r) {
-		var t = new ReviewTasteDto(r.getSweetness(), r.getSaltiness(), r.getSourness(), r.getBitterness(), r.getUmami());
+		var t = new ReviewTasteDto(
+				r.isSweetness(),
+				r.isSaltiness(),
+				r.isSourness(),
+				r.isBitterness(),
+				r.isUmami()
+		);
 		return new MyReviewResponse(
 				r.getId(),
 				r.getOrder().getId(),
