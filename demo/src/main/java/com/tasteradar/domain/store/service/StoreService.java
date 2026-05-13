@@ -66,12 +66,16 @@ public class StoreService {
 				s.getId(),
 				s.getName(),
 				s.getStoreStatus(),
+				s.getAddress(),
+				s.getAddressDetail(),
 				s.getOpenTime().format(HM),
 				s.getCloseTime().format(HM),
 				s.getRequiredTimeMinutes(),
 				s.getMinOrderAmount(),
 				s.getAverageRating(),
 				s.getReviewCount(),
+				s.getLatitude(),
+				s.getLongitude(),
 				images,
 				menus
 		);

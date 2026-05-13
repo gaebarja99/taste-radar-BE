@@ -50,6 +50,11 @@ jwt:
   access-token-validity-ms: 900000
   refresh-token-validity-ms: 1209600000
 
+# 카카오 REST API (주소 → 좌표 변환 등 서버측 호출용)
+# 운영에서는 환경변수 KAKAO_REST_API_KEY 로 주입 권장.
+kakao:
+  rest-api-key: ${KAKAO_REST_API_KEY:99fa6367f556d5862c3e1faeefc5c3f3}
+
 server:
   port: 8080
 
