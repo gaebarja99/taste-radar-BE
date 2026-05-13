@@ -1,38 +1,46 @@
 package com.tasteradar.domain.payment.api;
 
 import com.tasteradar.domain.payment.api.dto.KakaoPayApproveRequest;
+import com.tasteradar.domain.payment.api.dto.KakaoPayApproveResponse;
 import com.tasteradar.domain.payment.api.dto.KakaoPayCancelRequest;
 import com.tasteradar.domain.payment.api.dto.KakaoPayReadyRequest;
+import com.tasteradar.domain.payment.api.dto.KakaoPayReadyResponse;
+import com.tasteradar.domain.payment.service.KakaoPayService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
-import org.springframework.http.HttpStatus;
 
-/**
- * 카카오페이 연동은 별도 Admin Key·CID·REST 호출 설정이 필요합니다.
- * 엔드포인트 스펙만 두고 501로 응답합니다.
- */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/payments/kakaopay")
 public class PaymentController {
 
+	private final KakaoPayService kakaoPayService;
+
 	@PostMapping("/ready")
-	public void ready(@Valid @RequestBody KakaoPayReadyRequest request) {
-		throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED, "KakaoPay integration not configured");
+	public KakaoPayReadyResponse ready(Authentication authentication, @Valid @RequestBody KakaoPayReadyRequest request) {
+		return kakaoPayService.ready(parseUserId(authentication), request.orderId());
 	}
 
 	@PostMapping("/approve")
-	public void approve(@Valid @RequestBody KakaoPayApproveRequest request) {
-		throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED, "KakaoPay integration not configured");
+	public KakaoPayApproveResponse approve(Authentication authentication, @Valid @RequestBody KakaoPayApproveRequest request) {
+		return kakaoPayService.approve(parseUserId(authentication), request.orderId(), request.pgToken());
 	}
 
 	@PostMapping("/cancel")
-	public void cancel(@Valid @RequestBody KakaoPayCancelRequest request) {
-		throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED, "KakaoPay integration not configured");
+	public void cancel(Authentication authentication, @Valid @RequestBody KakaoPayCancelRequest request) {
+		kakaoPayService.cancel(parseUserId(authentication), request.orderId(), request.reason());
+	}
+
+	private static long parseUserId(Authentication authentication) {
+		Object principal = authentication.getPrincipal();
+		if (principal instanceof Number n) {
+			return n.longValue();
+		}
+		return Long.parseLong(String.valueOf(principal));
 	}
 }
