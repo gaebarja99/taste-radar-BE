@@ -2,7 +2,6 @@ package com.tasteradar.domain.store.api;
 
 import com.tasteradar.domain.store.api.dto.GeocodingResponse;
 import com.tasteradar.domain.store.service.KakaoGeocodingService;
-import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,7 +21,14 @@ public class OwnerGeocodeController {
 	private final KakaoGeocodingService kakaoGeocodingService;
 
 	@GetMapping
-	public GeocodingResponse geocode(@RequestParam @NotBlank String address) {
-		return kakaoGeocodingService.geocode(address);
+	public GeocodingResponse geocode(
+			@RequestParam(required = false) String address,
+			@RequestParam(required = false) String placeName) {
+		if ((address == null || address.isBlank()) && (placeName == null || placeName.isBlank())) {
+			throw new org.springframework.web.server.ResponseStatusException(
+					org.springframework.http.HttpStatus.BAD_REQUEST,
+					"address 또는 placeName 중 하나는 필요합니다.");
+		}
+		return kakaoGeocodingService.geocode(address, placeName);
 	}
 }
