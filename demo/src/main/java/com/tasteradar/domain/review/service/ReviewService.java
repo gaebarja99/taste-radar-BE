@@ -1,18 +1,30 @@
 package com.tasteradar.domain.review.service;
 
+import com.tasteradar.domain.menu.entity.Menu;
+import com.tasteradar.domain.menu.repository.MenuRepository;
 import com.tasteradar.domain.order.entity.FoodOrder;
 import com.tasteradar.domain.order.entity.OrderStatus;
 import com.tasteradar.domain.order.repository.FoodOrderRepository;
 import com.tasteradar.domain.review.api.dto.MyReviewResponse;
 import com.tasteradar.domain.review.api.dto.OwnerReplyRequest;
 import com.tasteradar.domain.review.api.dto.ReviewCreateRequest;
+import com.tasteradar.domain.review.api.dto.ReviewMenuTasteItemDto;
+import com.tasteradar.domain.review.api.dto.ReviewMenuTasteResponse;
 import com.tasteradar.domain.review.api.dto.ReviewTasteDto;
 import com.tasteradar.domain.review.api.dto.ReviewUpdateRequest;
 import com.tasteradar.domain.review.api.dto.StoreReviewResponse;
 import com.tasteradar.domain.review.entity.Review;
+import com.tasteradar.domain.review.entity.ReviewMenuTasteEntry;
+import com.tasteradar.domain.review.entity.TasteType;
 import com.tasteradar.domain.review.repository.ReviewRepository;
 import com.tasteradar.domain.store.repository.StoreRepository;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,6 +40,7 @@ public class ReviewService {
 	private final ReviewRepository reviewRepository;
 	private final FoodOrderRepository foodOrderRepository;
 	private final StoreRepository storeRepository;
+	private final MenuRepository menuRepository;
 
 	@Transactional
 	public MyReviewResponse createForOrder(long userId, long orderId, ReviewCreateRequest request) {
@@ -46,8 +59,7 @@ public class ReviewService {
 		r.setRating(request.rating());
 		r.setContent(request.content());
 		r.setDeleted(false);
-		applyTaste(r, request.taste());
-		validateTaste(request.taste());
+		applyMenuTastes(r, order, request.menuTastes());
 		reviewRepository.save(r);
 		refreshStoreReviewStats(order.getStore().getId());
 		return toMy(r);
@@ -83,8 +95,7 @@ public class ReviewService {
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found"));
 		r.setRating(request.rating());
 		r.setContent(request.content());
-		applyTaste(r, request.taste());
-		validateTaste(request.taste());
+		applyMenuTastes(r, r.getOrder(), request.menuTastes());
 		refreshStoreReviewStats(r.getOrder().getStore().getId());
 		return toMy(r);
 	}
@@ -108,10 +119,6 @@ public class ReviewService {
 		r.setOwnerReply(request.ownerReply());
 	}
 
-	/**
-	 * 사장이 자기 가게의 리뷰를 (소프트) 삭제한다.
-	 * 삭제 후 가게 평점/리뷰 수를 재계산.
-	 */
 	@Transactional
 	public void deleteByOwner(long ownerId, long reviewId) {
 		Review r = reviewRepository.findById(reviewId)
@@ -124,18 +131,46 @@ public class ReviewService {
 		refreshStoreReviewStats(storeId);
 	}
 
-	private void applyTaste(Review r, ReviewTasteDto t) {
-		r.setSweetness(t.sweet());
-		r.setSaltiness(t.salty());
-		r.setSourness(t.sour());
-		r.setBitterness(t.bitter());
-		r.setUmami(t.umami());
+	private void applyMenuTastes(Review review, FoodOrder order, List<ReviewMenuTasteItemDto> menuTastes) {
+		Set<Long> expectedMenuIds = order.getItems().stream()
+				.map(item -> item.getMenu().getId())
+				.collect(Collectors.toSet());
+		if (expectedMenuIds.isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "주문에 메뉴가 없어 리뷰를 작성할 수 없습니다.");
+		}
+
+		Map<Long, TasteType> tasteByMenuId = new HashMap<>();
+		for (ReviewMenuTasteItemDto item : menuTastes) {
+			if (item.menuId() == null) {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "메뉴 ID가 필요합니다.");
+			}
+			if (tasteByMenuId.putIfAbsent(item.menuId(), TasteType.fromApiKey(item.taste())) != null) {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "메뉴별 맛은 한 가지만 선택할 수 있습니다.");
+			}
+		}
+
+		if (!tasteByMenuId.keySet().equals(expectedMenuIds)) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "주문한 모든 메뉴에 대해 맛을 하나씩 선택해 주세요.");
+		}
+
+		long storeId = order.getStore().getId();
+		List<ReviewMenuTasteEntry> entries = new ArrayList<>();
+		for (Long menuId : expectedMenuIds) {
+			Menu menu = menuRepository.findByIdAndStore_Id(menuId, storeId)
+					.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "주문에 포함되지 않은 메뉴입니다."));
+			TasteType tasteType = tasteByMenuId.get(menuId);
+			entries.add(new ReviewMenuTasteEntry(menuId, menu.getName(), tasteType.toApiKey()));
+		}
+		review.setMenuTastes(entries);
+		applyDerivedTaste(review, new HashSet<>(tasteByMenuId.values()));
 	}
 
-	private void validateTaste(ReviewTasteDto t) {
-		if (!t.sweet() && !t.salty() && !t.sour() && !t.bitter() && !t.umami()) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "특화된 맛을 한 가지 이상 선택해 주세요.");
-		}
+	private void applyDerivedTaste(Review review, Set<TasteType> tastes) {
+		review.setSweetness(tastes.contains(TasteType.SWEET));
+		review.setSaltiness(tastes.contains(TasteType.SALTY));
+		review.setSourness(tastes.contains(TasteType.SOUR));
+		review.setBitterness(tastes.contains(TasteType.BITTER));
+		review.setUmami(tastes.contains(TasteType.UMAMI));
 	}
 
 	private MyReviewResponse toMy(Review r) {
@@ -146,6 +181,14 @@ public class ReviewService {
 				r.isBitterness(),
 				r.isUmami()
 		);
+		List<ReviewMenuTasteResponse> menuTastes = (r.getMenuTastes() == null ? List.<ReviewMenuTasteEntry>of() : r.getMenuTastes())
+				.stream()
+				.map(entry -> new ReviewMenuTasteResponse(
+						entry.getMenuId(),
+						entry.getMenuName(),
+						entry.getTaste()
+				))
+				.toList();
 		return new MyReviewResponse(
 				r.getId(),
 				r.getOrder().getId(),
@@ -154,6 +197,7 @@ public class ReviewService {
 				r.getRating(),
 				r.getContent(),
 				t,
+				menuTastes,
 				r.getOwnerReply(),
 				r.getCreatedAt()
 		);
