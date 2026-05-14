@@ -45,6 +45,7 @@ spring:
             scope:
               - profile_nickname
               - account_email
+              - talk_message
         provider:
           kakao:
             authorization-uri: https://kauth.kakao.com/oauth/authorize
@@ -62,6 +63,10 @@ jwt:
 # 운영에서는 환경변수 KAKAO_REST_API_KEY 로 주입 권장.
 kakao:
   rest-api-key: ${KAKAO_REST_API_KEY:}
+  talk:
+    # true: 카카오톡 나에게 보내기(로그인 시 저장된 토큰) + 선택적 webhook POST
+    enabled: ${KAKAO_TALK_ENABLED:true}
+    webhook-url: ${KAKAO_TALK_WEBHOOK_URL:}
   pay:
     cid: ${KAKAO_PAY_CID:TC0ONETIME}
     admin-key: ${KAKAO_PAY_ADMIN_KEY:}
