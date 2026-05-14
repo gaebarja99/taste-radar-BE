@@ -2,6 +2,7 @@ package com.tasteradar.domain.payment.service;
 
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
+import com.tasteradar.domain.notification.service.OrderNotificationService;
 import com.tasteradar.domain.order.entity.FoodOrder;
 import com.tasteradar.domain.order.entity.OrderStatus;
 import com.tasteradar.domain.order.repository.FoodOrderRepository;
@@ -31,6 +32,7 @@ public class KakaoPayService {
 
 	private final FoodOrderRepository foodOrderRepository;
 	private final PaymentRepository paymentRepository;
+	private final OrderNotificationService orderNotificationService;
 	private final RestClient restClient = RestClient.create();
 
 	@Value("${kakao.pay.cid:TC0ONETIME}")
@@ -131,6 +133,8 @@ public class KakaoPayService {
 		payment.setApprovedAt(approvedAt);
 		paymentRepository.save(payment);
 
+		orderNotificationService.notifyOrderStatus(order, OrderStatus.PENDING);
+
 		return new KakaoPayApproveResponse(
 				order.getId(),
 				payment.getStatus(),
@@ -141,9 +145,28 @@ public class KakaoPayService {
 
 	@Transactional
 	public void cancel(long userId, long orderId, String reason) {
-		ensureAdminKey();
 		Payment payment = paymentRepository.findByOrder_IdAndOrder_User_Id(orderId, userId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Payment not found"));
+		if (!"APPROVED".equals(payment.getStatus())) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT, "Only approved payments can be canceled");
+		}
+		cancelApprovedPayment(payment, reason);
+	}
+
+	@Transactional
+	public void cancelApprovedForOrder(FoodOrder order, String reason) {
+		paymentRepository.findByOrder_Id(order.getId()).ifPresent(payment -> {
+			if ("APPROVED".equals(payment.getStatus())) {
+				cancelApprovedPayment(payment, reason);
+			}
+		});
+	}
+
+	private void cancelApprovedPayment(Payment payment, String reason) {
+		ensureAdminKey();
+		if ("CANCELED".equals(payment.getStatus())) {
+			return;
+		}
 		if (!"APPROVED".equals(payment.getStatus())) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "Only approved payments can be canceled");
 		}
@@ -153,12 +176,42 @@ public class KakaoPayService {
 		body.put("tid", payment.getTid());
 		body.put("cancel_amount", payment.getTotalPrice());
 		body.put("cancel_tax_free_amount", 0);
+		if (reason != null && !reason.isBlank()) {
+			String payload = reason.trim();
+			if (payload.length() > 100) {
+				payload = payload.substring(0, 100);
+			}
+			body.put("payload", payload);
+		}
 
-		post("/cancel", body);
+		try {
+			post("/cancel", body);
+		} catch (ResponseStatusException e) {
+			if (e.getStatusCode() != HttpStatus.BAD_GATEWAY || !isAlreadyCanceledKakaoError(e.getReason())) {
+				throw e;
+			}
+		}
 
 		payment.setStatus("CANCELED");
 		payment.setCanceledAt(Instant.now());
 		paymentRepository.save(payment);
+	}
+
+	private static boolean isAlreadyCanceledKakaoError(String message) {
+		if (message == null || message.isBlank()) {
+			return false;
+		}
+		String m = message.toLowerCase();
+		return m.contains("이미 취소")
+				|| m.contains("already cancel")
+				|| m.contains("already canceled")
+				|| m.contains("already cancelled")
+				|| m.contains("취소된 결제")
+				|| m.contains("취소 가능한 금액")
+				|| m.contains("(-781)")
+				|| m.contains("(-782)")
+				|| m.contains("error_code -781")
+				|| m.contains("error_code -782");
 	}
 
 	private FoodOrder loadUserOrder(long userId, long orderId) {
@@ -208,13 +261,16 @@ public class KakaoPayService {
 		if (key.isBlank()) {
 			throw new ResponseStatusException(
 					HttpStatus.SERVICE_UNAVAILABLE,
-					"KakaoPay admin key is not configured (kakao.pay.admin-key)"
+					"KakaoPay admin key is not configured. Set KAKAO_PAY_ADMIN_KEY in taste-radar-BE/demo/.env and restart the server."
 			);
 		}
 		if (key.length() != 40) {
+			String hint = key.length() == 32
+					? " (looks like Kakao REST API key — get Secret Key(dev) from https://developers.kakaopay.com)"
+					: " (current length: " + key.length() + ")";
 			throw new ResponseStatusException(
 					HttpStatus.SERVICE_UNAVAILABLE,
-					"KakaoPay admin key must be a 40-character Secret Key from Kakao Pay (not REST API key)"
+					"KakaoPay admin key must be a 40-character Secret Key from developers.kakaopay.com" + hint
 			);
 		}
 	}

@@ -14,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -35,6 +37,7 @@ public class KakaoOAuth2LoginSuccessHandler implements AuthenticationSuccessHand
 	private final UserOAuthService userOAuthService;
 	private final JwtTokenProvider jwtTokenProvider;
 	private final RefreshTokenService refreshTokenService;
+	private final OAuth2AuthorizedClientService authorizedClientService;
 
 	@Value("${app.oauth-success-redirect}")
 	private String successRedirect;
@@ -56,7 +59,8 @@ public class KakaoOAuth2LoginSuccessHandler implements AuthenticationSuccessHand
 		log.info("[kakao-login] email={} pendingRoleCookie={}", profile.email(), pendingRole);
 		clearPendingRoleCookie(response);
 
-		User user = userOAuthService.upsertKakaoUser(profile, pendingRole);
+		String kakaoTalkToken = resolveKakaoTalkAccessToken(token);
+		User user = userOAuthService.upsertKakaoUser(profile, pendingRole, kakaoTalkToken);
 		log.info("[kakao-login] resolved userId={} email={} role={}", user.getId(), user.getEmail(), user.getRole());
 
 		String access = jwtTokenProvider.createAccessToken(user.getId(), user.getRole().name());
@@ -95,5 +99,21 @@ public class KakaoOAuth2LoginSuccessHandler implements AuthenticationSuccessHand
 
 	private static String nullToEmpty(String value) {
 		return value == null ? "" : value;
+	}
+
+	private String resolveKakaoTalkAccessToken(OAuth2AuthenticationToken token) {
+		try {
+			OAuth2AuthorizedClient client = authorizedClientService.loadAuthorizedClient(
+					token.getAuthorizedClientRegistrationId(),
+					token.getName()
+			);
+			if (client == null || client.getAccessToken() == null) {
+				return null;
+			}
+			return client.getAccessToken().getTokenValue();
+		} catch (Exception e) {
+			log.warn("[kakao-login] could not load Kakao access token for talk_message: {}", e.getMessage());
+			return null;
+		}
 	}
 }
