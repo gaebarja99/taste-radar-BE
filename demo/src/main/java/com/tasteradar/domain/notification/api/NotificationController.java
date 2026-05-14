@@ -25,10 +25,24 @@ public class NotificationController {
 		return notificationService.list(parseUserId(authentication));
 	}
 
+	@GetMapping("/unread-count")
+	public UnreadCountResponse unreadCount(Authentication authentication) {
+		return new UnreadCountResponse(notificationService.unreadCount(parseUserId(authentication)));
+	}
+
+	@PatchMapping("/read-all")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void readAll(Authentication authentication) {
+		notificationService.markAllRead(parseUserId(authentication));
+	}
+
 	@PatchMapping("/{id}/read")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void read(Authentication authentication, @PathVariable long id) {
 		notificationService.markRead(parseUserId(authentication), id);
+	}
+
+	public record UnreadCountResponse(long count) {
 	}
 
 	private long parseUserId(Authentication authentication) {

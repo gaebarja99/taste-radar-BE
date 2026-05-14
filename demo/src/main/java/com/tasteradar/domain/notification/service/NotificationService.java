@@ -35,4 +35,14 @@ public class NotificationService {
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Notification not found"));
 		n.setRead(true);
 	}
+
+	@Transactional
+	public void markAllRead(long userId) {
+		notificationRepository.markAllReadByUser_Id(userId);
+	}
+
+	@Transactional(readOnly = true)
+	public long unreadCount(long userId) {
+		return notificationRepository.countByUser_IdAndIsReadFalse(userId);
+	}
 }
