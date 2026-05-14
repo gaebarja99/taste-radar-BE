@@ -125,7 +125,6 @@ public class StoreTasteService {
 		if (value == null || value.isNaN()) {
 			return 0;
 		}
-		// boolean 특화 맛 비율(0~1) → 레이더 0~5
 		return Math.max(0, Math.min(5, (int) Math.round(value * 5)));
 	}
 
