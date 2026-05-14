@@ -29,9 +29,18 @@ public class UserOAuthService {
 	 */
 	@Transactional
 	public User upsertKakaoUser(KakaoUserProfile profile, String pendingRole) {
+		return upsertKakaoUser(profile, pendingRole, null);
+	}
+
+	@Transactional
+	public User upsertKakaoUser(KakaoUserProfile profile, String pendingRole, String kakaoTalkAccessToken) {
 		return userRepository.findByEmailIncludingDeleted(profile.email())
 				.map(existing -> {
 					existing.setNickname(profile.nickname());
+					existing.setKakaoId(profile.kakaoId());
+					if (kakaoTalkAccessToken != null && !kakaoTalkAccessToken.isBlank()) {
+						existing.setKakaoTalkAccessToken(kakaoTalkAccessToken);
+					}
 					if (existing.isDeleted()) {
 						existing.setDeleted(false);
 					}
@@ -44,6 +53,10 @@ public class UserOAuthService {
 					User user = new User();
 					user.setEmail(profile.email());
 					user.setNickname(profile.nickname());
+					user.setKakaoId(profile.kakaoId());
+					if (kakaoTalkAccessToken != null && !kakaoTalkAccessToken.isBlank()) {
+						user.setKakaoTalkAccessToken(kakaoTalkAccessToken);
+					}
 					user.setRole(resolveRole(pendingRole));
 					user.setDeleted(false);
 					return userRepository.save(user);

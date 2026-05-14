@@ -75,6 +75,13 @@ public class User extends BaseTimeEntity {
 	@Column(name = "address_detail", length = 100)
 	private String addressDetail;
 
+	@Column(name = "kakao_id")
+	private Long kakaoId;
+
+	@Size(max = 512)
+	@Column(name = "kakao_talk_access_token", length = 512)
+	private String kakaoTalkAccessToken;
+
 	@OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	private UserTastePreference tastePreference;
 
