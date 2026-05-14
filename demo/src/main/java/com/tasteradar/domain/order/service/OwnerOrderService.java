@@ -1,5 +1,6 @@
 package com.tasteradar.domain.order.service;
 
+import com.tasteradar.domain.notification.service.OrderNotificationService;
 import com.tasteradar.domain.order.api.dto.OrderActionResponse;
 import com.tasteradar.domain.order.api.dto.OrderSummaryResponse;
 import com.tasteradar.domain.order.api.dto.OwnerOrderStatusPatchRequest;
@@ -9,6 +10,7 @@ import com.tasteradar.domain.order.api.dto.TodayOrderCountResponse;
 import com.tasteradar.domain.order.entity.FoodOrder;
 import com.tasteradar.domain.order.entity.OrderStatus;
 import com.tasteradar.domain.order.repository.FoodOrderRepository;
+import com.tasteradar.domain.payment.service.KakaoPayService;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -28,6 +30,8 @@ public class OwnerOrderService {
 	private static final ZoneId SEOUL = ZoneId.of("Asia/Seoul");
 
 	private final FoodOrderRepository foodOrderRepository;
+	private final KakaoPayService kakaoPayService;
+	private final OrderNotificationService orderNotificationService;
 
 	@Transactional
 	public OrderActionResponse accept(long ownerId, long orderId) {
@@ -36,6 +40,7 @@ public class OwnerOrderService {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "Only PENDING can be accepted");
 		}
 		order.setOrderStatus(OrderStatus.COOKING);
+		orderNotificationService.notifyOrderStatus(order, OrderStatus.COOKING);
 		return new OrderActionResponse(order.getId(), order.getOrderStatus());
 	}
 
@@ -45,6 +50,8 @@ public class OwnerOrderService {
 		if (order.getOrderStatus() != OrderStatus.PENDING) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "Only PENDING can be rejected");
 		}
+		String reason = request.rejectionReason() != null ? request.rejectionReason().trim() : "";
+		kakaoPayService.cancelApprovedForOrder(order, reason.isBlank() ? "가게 주문 거절" : reason);
 		order.setOrderStatus(OrderStatus.REJECTED);
 		order.setRejectionReason(request.rejectionReason());
 		return new OrderActionResponse(order.getId(), order.getOrderStatus());
@@ -57,8 +64,10 @@ public class OwnerOrderService {
 		OrderStatus next = request.status();
 		if (current == OrderStatus.COOKING && next == OrderStatus.DELIVERING) {
 			order.setOrderStatus(OrderStatus.DELIVERING);
+			orderNotificationService.notifyOrderStatus(order, OrderStatus.DELIVERING);
 		} else if (current == OrderStatus.DELIVERING && next == OrderStatus.DELIVERED) {
 			order.setOrderStatus(OrderStatus.DELIVERED);
+			orderNotificationService.notifyOrderStatus(order, OrderStatus.DELIVERED);
 		} else {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "Invalid status transition");
 		}

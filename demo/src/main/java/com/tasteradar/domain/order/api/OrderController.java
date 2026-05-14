@@ -1,5 +1,6 @@
 package com.tasteradar.domain.order.api;
 
+import com.tasteradar.domain.order.api.dto.OrderCancelRequest;
 import com.tasteradar.domain.order.api.dto.OrderCreateRequest;
 import com.tasteradar.domain.order.api.dto.OrderDetailResponse;
 import com.tasteradar.domain.order.api.dto.OrderSummaryResponse;
@@ -47,8 +48,13 @@ public class OrderController {
 
 	@PostMapping("/{orderId}/cancel")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void cancel(Authentication authentication, @PathVariable long orderId) {
-		orderService.cancel(parseUserId(authentication), orderId);
+	public void cancel(
+			Authentication authentication,
+			@PathVariable long orderId,
+			@RequestBody(required = false) OrderCancelRequest request
+	) {
+		String reason = request != null ? request.reason() : null;
+		orderService.cancel(parseUserId(authentication), orderId, reason);
 	}
 
 	private long parseUserId(Authentication authentication) {

@@ -15,6 +15,7 @@ final class OrderSummaryMapper {
 	}
 
 	static OrderSummaryResponse toSummary(FoodOrder order, boolean hasReview) {
+		String paymentStatus = order.getPayment() != null ? order.getPayment().getStatus() : null;
 		return new OrderSummaryResponse(
 				order.getId(),
 				order.getStore().getId(),
@@ -24,7 +25,8 @@ final class OrderSummaryMapper {
 				order.getTotalAmount(),
 				order.getRejectionReason(),
 				order.getCreatedAt(),
-				hasReview
+				hasReview,
+				paymentStatus
 		);
 	}
 

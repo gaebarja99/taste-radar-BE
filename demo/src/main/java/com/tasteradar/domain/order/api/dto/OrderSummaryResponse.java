@@ -12,6 +12,7 @@ public record OrderSummaryResponse(
 		int totalAmount,
 		String rejectionReason,
 		Instant createdAt,
-		boolean hasReview
+		boolean hasReview,
+		String paymentStatus
 ) {
 }

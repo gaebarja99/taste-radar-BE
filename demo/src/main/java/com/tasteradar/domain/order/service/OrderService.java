@@ -98,19 +98,18 @@ public class OrderService {
 	}
 
 	@Transactional
-	public void cancel(long userId, long orderId) {
+	public void cancel(long userId, long orderId, String reason) {
 		FoodOrder order = foodOrderRepository.findByIdAndUser_Id(orderId, userId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found"));
+		if (order.getOrderStatus() == OrderStatus.CANCELED) {
+			return;
+		}
 		if (order.getOrderStatus() != OrderStatus.PENDING) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "Only PENDING orders can be cancelled");
 		}
-		paymentRepository.findByOrder_Id(orderId).ifPresent(payment -> {
-			if ("APPROVED".equals(payment.getStatus())) {
-				kakaoPayService.cancel(userId, orderId, "고객 주문 취소");
-			}
-			paymentRepository.delete(payment);
-		});
-		foodOrderRepository.delete(order);
+		String cancelReason = (reason == null || reason.isBlank()) ? "고객 주문 취소" : reason.trim();
+		kakaoPayService.cancelApprovedForOrder(order, cancelReason);
+		order.setOrderStatus(OrderStatus.CANCELED);
 	}
 
 	private OrderDetailResponse toDetail(FoodOrder o) {

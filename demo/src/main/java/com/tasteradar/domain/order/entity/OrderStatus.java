@@ -10,7 +10,8 @@ public enum OrderStatus {
 	COOKING("조리 중"),
 	DELIVERING("배달 중"),
 	DELIVERED("배달 완료"),
-	REJECTED("주문 거절");
+	REJECTED("주문 거절"),
+	CANCELED("주문 취소");
 
 	private final String description;
 }
