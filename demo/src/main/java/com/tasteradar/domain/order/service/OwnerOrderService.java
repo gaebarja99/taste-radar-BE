@@ -77,13 +77,19 @@ public class OwnerOrderService {
 	@Transactional(readOnly = true)
 	public TodayOrderCountResponse statsToday(long ownerId) {
 		InstantRange r = todaySeoulRange();
-		return new TodayOrderCountResponse(foodOrderRepository.countTodayByOwner(ownerId, r.start(), r.end()));
+		long total = foodOrderRepository.countTodayByOwnerNative(ownerId, r.start(), r.end());
+		return new TodayOrderCountResponse(total);
 	}
 
 	@Transactional(readOnly = true)
 	public List<StoreOrderStatDto> statsTodayByStore(long ownerId) {
 		InstantRange r = todaySeoulRange();
-		return foodOrderRepository.countTodayGroupedByStore(ownerId, r.start(), r.end());
+		return foodOrderRepository.countTodayGroupedByStoreNative(ownerId, r.start(), r.end()).stream()
+				.map(row -> new StoreOrderStatDto(
+						((Number) row[0]).longValue(),
+						String.valueOf(row[1]),
+						((Number) row[2]).longValue()))
+				.toList();
 	}
 
 	/**
