@@ -14,6 +14,8 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 
 @Getter
 @Setter
@@ -30,9 +32,18 @@ public class OrderItem extends BaseTimeEntity {
 	@JoinColumn(name = "order_id", nullable = false)
 	private FoodOrder order;
 
-	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "menu_id", nullable = false)
+	@NotFound(action = NotFoundAction.IGNORE)
 	private Menu menu;
+
+	/** soft-delete 등으로 menu 연관이 없을 때 FK 조회용 */
+	@Column(name = "menu_id", insertable = false, updatable = false)
+	private Long menuId;
+
+	/** 주문 시점 메뉴명 스냅샷 (삭제 후에도 표시) */
+	@Column(name = "menu_name", length = 100)
+	private String menuName;
 
 	@Column(nullable = false)
 	private int quantity;
