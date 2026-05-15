@@ -6,6 +6,7 @@ import com.tasteradar.domain.user.entity.User;
 import com.tasteradar.domain.user.entity.UserRole;
 import com.tasteradar.domain.user.entity.UserTastePreference;
 import com.tasteradar.domain.user.repository.UserRepository;
+import com.tasteradar.security.service.RefreshTokenService;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,7 @@ public class UserProfileService {
 
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final RefreshTokenService refreshTokenService;
 
 	@Transactional(readOnly = true)
 	public UserProfileResponse getMe(long userId) {
@@ -97,6 +99,7 @@ public class UserProfileService {
 	@Transactional
 	public void withdraw(long userId) {
 		User user = loadUser(userId);
+		refreshTokenService.delete(userId);
 		userRepository.delete(user);
 	}
 
