@@ -1,9 +1,13 @@
 package com.tasteradar.security.api;
 
 import com.tasteradar.domain.user.repository.UserRepository;
+import com.tasteradar.security.api.dto.AuthTokenResponse;
+import com.tasteradar.security.api.dto.LoginRequest;
+import com.tasteradar.security.api.dto.RegisterRequest;
 import com.tasteradar.security.api.dto.TokenRefreshRequest;
 import com.tasteradar.security.api.dto.TokenRefreshResponse;
 import com.tasteradar.security.provider.JwtTokenProvider;
+import com.tasteradar.security.service.LocalAuthService;
 import com.tasteradar.security.service.RefreshTokenService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +28,17 @@ public class AuthController {
 	private final JwtTokenProvider jwtTokenProvider;
 	private final RefreshTokenService refreshTokenService;
 	private final UserRepository userRepository;
+	private final LocalAuthService localAuthService;
+
+	@PostMapping("/register")
+	public AuthTokenResponse register(@Valid @RequestBody RegisterRequest request) {
+		return localAuthService.register(request);
+	}
+
+	@PostMapping("/login")
+	public AuthTokenResponse login(@Valid @RequestBody LoginRequest request) {
+		return localAuthService.login(request);
+	}
 
 	@PostMapping("/refresh")
 	public TokenRefreshResponse refresh(@Valid @RequestBody TokenRefreshRequest request) {
