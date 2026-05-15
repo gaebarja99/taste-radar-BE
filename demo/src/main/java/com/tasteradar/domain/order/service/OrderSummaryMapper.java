@@ -40,7 +40,7 @@ final class OrderSummaryMapper {
 	}
 
 	private static String formatItemLine(OrderItem item) {
-		String name = item.getMenu().getName();
+		String name = OrderItemMenuSupport.name(item);
 		int qty = item.getQuantity();
 		return qty > 1 ? name + " ×" + qty : name;
 	}
