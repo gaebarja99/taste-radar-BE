@@ -26,6 +26,18 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 	@Query("select count(r) from Review r join r.order o where o.store.id = :storeId")
 	long countReviewsForStore(@Param("storeId") long storeId);
 
+	@Query("select coalesce(avg(r.rating), 0) from Review r join r.order o where o.store.owner.id = :ownerId")
+	double averageRatingForOwner(@Param("ownerId") long ownerId);
+
+	@Query("select count(r) from Review r join r.order o where o.store.owner.id = :ownerId")
+	long countReviewsForOwner(@Param("ownerId") long ownerId);
+
+	@Query("select count(r) from Review r join r.order o where o.store.owner.id = :ownerId and r.rating = :rating")
+	long countByRatingForOwner(@Param("ownerId") long ownerId, @Param("rating") int rating);
+
+	@Query("select count(r) from Review r join r.order o where o.store.owner.id = :ownerId and r.rating <= 2")
+	long countLowRatingForOwner(@Param("ownerId") long ownerId);
+
 	@Query("""
 			select avg(case when r.sweetness = true then 1.0 else 0.0 end) as avgSweetness,
 			       avg(case when r.saltiness = true then 1.0 else 0.0 end) as avgSaltiness,
