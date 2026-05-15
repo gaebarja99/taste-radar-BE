@@ -1,6 +1,5 @@
 package com.tasteradar.domain.store.service;
 
-import com.tasteradar.domain.order.api.dto.StoreOrderStatDto;
 import com.tasteradar.domain.order.repository.FoodOrderRepository;
 import com.tasteradar.domain.store.api.dto.OwnerStoreCreateRequest;
 import com.tasteradar.domain.store.api.dto.OwnerStoreSummaryResponse;
@@ -49,8 +48,8 @@ public class OwnerStoreService {
 		List<Store> stores = storeRepository.findByOwner_IdOrderByIdAsc(ownerId);
 		Instant start = LocalDate.now(SEOUL).atStartOfDay(SEOUL).toInstant();
 		Instant end = LocalDate.now(SEOUL).plusDays(1).atStartOfDay(SEOUL).toInstant();
-		Map<Long, Long> todayMap = foodOrderRepository.countTodayGroupedByStore(ownerId, start, end).stream()
-				.collect(Collectors.toMap(StoreOrderStatDto::storeId, StoreOrderStatDto::orderCount));
+		Map<Long, Long> todayMap = foodOrderRepository.countTodayGroupedByStoreNative(ownerId, start, end).stream()
+				.collect(Collectors.toMap(row -> ((Number) row[0]).longValue(), row -> ((Number) row[2]).longValue()));
 		return stores.stream()
 				.map(s -> new OwnerStoreSummaryResponse(
 						s.getId(),
