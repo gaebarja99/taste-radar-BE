@@ -69,6 +69,7 @@ public class OrderService {
 			OrderItem oi = new OrderItem();
 			oi.setOrder(order);
 			oi.setMenu(ci.getMenu());
+			oi.setMenuName(ci.getMenu().getName());
 			oi.setQuantity(ci.getQuantity());
 			oi.setPrice((int) ci.getMenu().getPrice());
 			order.getItems().add(oi);
@@ -115,8 +116,8 @@ public class OrderService {
 	private OrderDetailResponse toDetail(FoodOrder o) {
 		var items = o.getItems().stream()
 				.map(oi -> new OrderItemResponse(
-						oi.getMenu().getId(),
-						oi.getMenu().getName(),
+						OrderItemMenuSupport.menuId(oi),
+						OrderItemMenuSupport.name(oi),
 						oi.getQuantity(),
 						oi.getPrice(),
 						oi.getPrice() * oi.getQuantity()
