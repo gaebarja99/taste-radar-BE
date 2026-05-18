@@ -27,26 +27,12 @@
 
 ## 기술 스택
 
-| 분류 | 기술 |
-|------|------|
-| Language | Java 21 |
-| Framework | Spring Boot 4 · Spring Security · Spring Data JPA |
-| Auth | JWT · OAuth2 Client (Kakao) |
-| DB | MySQL |
-| Cache | Redis (Refresh Token · AI 응답 캐시) |
-| Query | QueryDSL 7 |
-| AI | Google Gemini API |
-| External | Kakao (Login · Pay · REST Geocode · Talk) |
-| Build | Gradle |
-
+<img src="https://img.shields.io/badge/Java_21-007396?style=for-the-badge&logo=Java&logoColor=white"> <img src="https://img.shields.io/badge/Spring_Boot_4-6DB33F?style=for-the-badge&logo=Spring-Boot&logoColor=white"> <img src="https://img.shields.io/badge/Spring_Security-6DB33F?style=for-the-badge&logo=Spring-Security&logoColor=white"> <img src="https://img.shields.io/badge/Spring_Data_JPA-6DB33F?style=for-the-badge&logo=Spring&logoColor=white"> <img src="https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=MySQL&logoColor=white"> <img src="https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=Redis&logoColor=white"> <img src="https://img.shields.io/badge/QueryDSL-007ACC?style=for-the-badge&logoColor=white">
 ---
-
-
-
-
 
 ## 프로젝트 구조
 
+```
 src
 +---main
 |   +---java
@@ -299,5 +285,5 @@ src
             \---tasteradar
                     TasteRadarApplicationTests.java
 
-
+```
 
