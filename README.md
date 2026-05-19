@@ -80,266 +80,47 @@
 <img src="https://img.shields.io/badge/Java_21-007396?style=for-the-badge&logo=Java&logoColor=white"> <img src="https://img.shields.io/badge/Spring_Boot_4-6DB33F?style=for-the-badge&logo=Spring-Boot&logoColor=white"> <img src="https://img.shields.io/badge/Spring_Security-6DB33F?style=for-the-badge&logo=Spring-Security&logoColor=white"> <img src="https://img.shields.io/badge/Spring_Data_JPA-6DB33F?style=for-the-badge&logo=Spring&logoColor=white"> <img src="https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=MySQL&logoColor=white"> <img src="https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=Redis&logoColor=white"> <img src="https://img.shields.io/badge/QueryDSL-007ACC?style=for-the-badge&logoColor=white">
 ---
 
-## 설계
-<img width="2690" height="1292" alt="TasteRadar (1)" src="https://github.com/user-attachments/assets/b8198b6c-8f0f-4ee2-8c5e-f0d6049925dd" />
+## 🛠️ Architecture & Design
+
+<details>
+<summary><b>📊 데이터베이스 설계 (ERD) 보기</b></summary>
+<br>
+
+<img width="100%" alt="TasteRadar ERD" src="https://github.com/user-attachments/assets/b8198b6c-8f0f-4ee2-8c5e-f0d6049925dd" />
+
+</details>
+
+<details>
+<summary><b>📋 요구사항 명세서 보기</b></summary>
+<br>
+
+* 📝 **TasteRadar 요구사항 명세서 (Notion):** [바로가기](https://full-airplane-477.notion.site/35c65ed6701d8014a75ef11745136984?source=copy_link)
+
+</details>
+
+<details>
+<summary><b>🚀 API 명세서 보기</b></summary>
+<br>
+
+* 📡 **TasteRadar API 명세서 (Notion):** [바로가기](https://full-airplane-477.notion.site/API-35d65ed6701d808db5c4fe0c7754263d?source=copy_link)
+
+</details>
 
 
 ---
 
-## 프로젝트 구조
+### 📂 프로젝트 구조
 
-```
-src
-+---main
-|   +---java
-|   |   \---com
-|   |       \---tasteradar
-|   |           |   TasteRadarApplication.java
-|   |           |
-|   |           +---domain
-|   |           |   +---ai
-|   |           |   |   +---api
-|   |           |   |   |   |   AiController.java
-|   |           |   |   |   \---dto
-|   |           |   |   |           StoreRecommendationsResponse.java
-|   |           |   |   |           TastePentagonResponse.java
-|   |           |   |   \---service
-|   |           |   |       |   AiCacheService.java
-|   |           |   |       |   AiService.java
-|   |           |   |       |   GeminiRecommendationClient.java
-|   |           |   |       \---dto
-|   |           |   |               LlmMenuRecommendation.java
-|   |           |   |               MenuRecommendContext.java
-|   |           |   |
-|   |           |   +---cart
-|   |           |   |   +---api
-|   |           |   |   |   |   CartController.java
-|   |           |   |   |   \---dto
-|   |           |   |   |           CartAddRequest.java
-|   |           |   |   |           CartItemResponse.java
-|   |           |   |   |           CartQuantityPatchRequest.java
-|   |           |   |   |           CartResponse.java
-|   |           |   |   +---entity
-|   |           |   |   |       Cart.java
-|   |           |   |   |       CartItem.java
-|   |           |   |   +---repository
-|   |           |   |   |       CartRepository.java
-|   |           |   |   \---service
-|   |           |   |           CartService.java
-|   |           |   |
-|   |           |   +---menu
-|   |           |   |   +---api
-|   |           |   |   |   |   OwnerMenuController.java
-|   |           |   |   |   \---dto
-|   |           |   |   |           MenuCreateRequest.java
-|   |           |   |   |           MenuResponse.java
-|   |           |   |   |           MenuUpdateRequest.java
-|   |           |   |   +---entity
-|   |           |   |   |       Menu.java
-|   |           |   |   +---repository
-|   |           |   |   |       MenuRepository.java
-|   |           |   |   \---service
-|   |           |   |           MenuCommandService.java
-|   |           |   |
-|   |           |   +---notification
-|   |           |   |   +---api
-|   |           |   |   |   |   NotificationController.java
-|   |           |   |   |   \---dto
-|   |           |   |   |           NotificationResponse.java
-|   |           |   |   +---entity
-|   |           |   |   |       Notification.java
-|   |           |   |   +---repository
-|   |           |   |   |       NotificationRepository.java
-|   |           |   |   \---service
-|   |           |   |           KakaoTalkOrderMessageService.java
-|   |           |   |           NotificationService.java
-|   |           |   |           OrderNotificationService.java
-|   |           |   |
-|   |           |   +---order
-|   |           |   |   +---api
-|   |           |   |   |   |   OrderController.java
-|   |           |   |   |   |   OwnerDashboardController.java
-|   |           |   |   |   |   OwnerOrderController.java
-|   |           |   |   |   \---dto
-|   |           |   |   |           DailySalesPointDto.java
-|   |           |   |   |           OrderActionResponse.java
-|   |           |   |   |           OrderCancelRequest.java
-|   |           |   |   |           OrderCreateRequest.java
-|   |           |   |   |           OrderDetailResponse.java
-|   |           |   |   |           OrderItemResponse.java
-|   |           |   |   |           OrderSummaryResponse.java
-|   |           |   |   |           OwnerOrderStatusPatchRequest.java
-|   |           |   |   |           OwnerRatingSummaryResponse.java
-|   |           |   |   |           OwnerRejectRequest.java
-|   |           |   |   |           StoreOrderStatDto.java
-|   |           |   |   |           TodayOrderCountResponse.java
-|   |           |   |   |           WeeklySalesResponse.java
-|   |           |   |   +---entity
-|   |           |   |   |       FoodOrder.java
-|   |           |   |   |       OrderItem.java
-|   |           |   |   |       OrderStatus.java
-|   |           |   |   +---repository
-|   |           |   |   |       FoodOrderRepository.java
-|   |           |   |   \---service
-|   |           |   |           OrderItemMenuSupport.java
-|   |           |   |           OrderService.java
-|   |           |   |           OrderSummaryMapper.java
-|   |           |   |           OwnerDashboardService.java
-|   |           |   |           OwnerOrderService.java
-|   |           |   |
-|   |           |   +---payment
-|   |           |   |   +---api
-|   |           |   |   |   |   PaymentController.java
-|   |           |   |   |   \---dto
-|   |           |   |   |           KakaoPayApproveRequest.java
-|   |           |   |   |           KakaoPayApproveResponse.java
-|   |           |   |   |           KakaoPayCancelRequest.java
-|   |           |   |   |           KakaoPayReadyRequest.java
-|   |           |   |   |           KakaoPayReadyResponse.java
-|   |           |   |   +---entity
-|   |           |   |   |       Payment.java
-|   |           |   |   +---repository
-|   |           |   |   |       PaymentRepository.java
-|   |           |   |   \---service
-|   |           |   |           KakaoPayService.java
-|   |           |   |
-|   |           |   +---review
-|   |           |   |   +---api
-|   |           |   |   |   |   OrderReviewController.java
-|   |           |   |   |   |   OwnerReviewController.java
-|   |           |   |   |   |   ReviewController.java
-|   |           |   |   |   \---dto
-|   |           |   |   |           MyReviewResponse.java
-|   |           |   |   |           OwnerReplyRequest.java
-|   |           |   |   |           ReviewCreateRequest.java
-|   |           |   |   |           ReviewMenuTasteItemDto.java
-|   |           |   |   |           ReviewMenuTasteResponse.java
-|   |           |   |   |           ReviewTasteDto.java
-|   |           |   |   |           ReviewUpdateRequest.java
-|   |           |   |   |           StoreReviewResponse.java
-|   |           |   |   +---entity
-|   |           |   |   |       Review.java
-|   |           |   |   |       ReviewMenuTasteEntry.java
-|   |           |   |   |       TasteType.java
-|   |           |   |   +---repository
-|   |           |   |   |       ReviewRepository.java
-|   |           |   |   |       StoreTasteAggregateProjection.java
-|   |           |   |   |       StoreTasteBatchProjection.java
-|   |           |   |   \---service
-|   |           |   |           ReviewService.java
-|   |           |   |
-|   |           |   +---store
-|   |           |   |   +---api
-|   |           |   |   |   |   OwnerGeocodeController.java
-|   |           |   |   |   |   OwnerStoreController.java
-|   |           |   |   |   |   StoreController.java
-|   |           |   |   |   \---dto
-|   |           |   |   |           GeocodingResponse.java
-|   |           |   |   |           OwnerStoreCreateRequest.java
-|   |           |   |   |           OwnerStoreSummaryResponse.java
-|   |           |   |   |           OwnerStoreUpdateRequest.java
-|   |           |   |   |           StoreCreatedResponse.java
-|   |           |   |   |           StoreDetailResponse.java
-|   |           |   |   |           StoreImageUrlResponse.java
-|   |           |   |   |           StoreMenuResponse.java
-|   |           |   |   |           StoreStatusPatchRequest.java
-|   |           |   |   |           StoreStatusResponse.java
-|   |           |   |   |           StoreSummaryResponse.java
-|   |           |   |   |           StoreTasteHighlightResponse.java
-|   |           |   |   |           StoreTasteProfileResponse.java
-|   |           |   |   +---entity
-|   |           |   |   |       Store.java
-|   |           |   |   |       StoreImage.java
-|   |           |   |   |       StoreStatus.java
-|   |           |   |   +---repository
-|   |           |   |   |       StoreRepository.java
-|   |           |   |   |       StoreSearchRepository.java
-|   |           |   |   |       StoreSearchRepositoryImpl.java
-|   |           |   |   \---service
-|   |           |   |           KakaoGeocodingService.java
-|   |           |   |           OwnerStoreService.java
-|   |           |   |           StoreService.java
-|   |           |   |           StoreTasteService.java
-|   |           |   |
-|   |           |   +---upload
-|   |           |   |   +---api
-|   |           |   |   |       OwnerUploadController.java
-|   |           |   |   \---service
-|   |           |   |           LocalFileStorageService.java
-|   |           |   |
-|   |           |   \---user
-|   |           |       +---api
-|   |           |       |   |   UserController.java
-|   |           |       |   \---dto
-|   |           |       |           AddressUpdateRequest.java
-|   |           |       |           NicknameUpdateRequest.java
-|   |           |       |           PasswordUpdateRequest.java
-|   |           |       |           TastePreferencesResponse.java
-|   |           |       |           TasteUpdateRequest.java
-|   |           |       |           UserProfileResponse.java
-|   |           |       +---entity
-|   |           |       |       User.java
-|   |           |       |       UserRole.java
-|   |           |       |       UserTastePreference.java
-|   |           |       +---repository
-|   |           |       |       UserRepository.java
-|   |           |       \---service
-|   |           |               UserOAuthService.java
-|   |           |               UserProfileService.java
-|   |           |
-|   |           +---global
-|   |           |   +---api
-|   |           |   |       GlobalExceptionHandler.java
-|   |           |   +---config
-|   |           |   |       JpaAuditingConfig.java
-|   |           |   |       QuerydslConfig.java
-|   |           |   |       UploadProperties.java
-|   |           |   |       WebMvcConfig.java
-|   |           |   \---entity
-|   |           |           BaseCreatedAtEntity.java
-|   |           |           BaseTimeEntity.java
-|   |           |
-|   |           +---oauth
-|   |           |   \---kakao
-|   |           |       |   KakaoLoginStartController.java
-|   |           |       |   KakaoOAuth2LoginSuccessHandler.java
-|   |           |       |   KakaoOAuth2Service.java
-|   |           |       |   KakaoOAuth2ServiceImpl.java
-|   |           |       |   KakaoUserAttributeMapper.java
-|   |           |       |   KakaoUserProfile.java
-|   |           |       \---dto
-|   |           |               KakaoLoginTokenResponse.java
-|   |           |
-|   |           \---security
-|   |               +---api
-|   |               |   |   AuthController.java
-|   |               |   \---dto
-|   |               |           AuthTokenResponse.java
-|   |               |           LoginRequest.java
-|   |               |           RegisterRequest.java
-|   |               |           TokenRefreshRequest.java
-|   |               |           TokenRefreshResponse.java
-|   |               +---config
-|   |               |       JwtProperties.java
-|   |               |       SecurityConfig.java
-|   |               +---filter
-|   |               |       JwtAuthenticationFilter.java
-|   |               +---provider
-|   |               |       JwtTokenProvider.java
-|   |               \---service
-|   |                       LocalAuthService.java
-|   |                       RefreshTokenService.java
-|   |
-|   +---generated                 (QueryDSL Q-class, build only)
-|   |
-|   \---resources
-|           application.yml
-|
-\---test
-    \---java
-        \---com
-            \---tasteradar
-                    TasteRadarApplicationTests.java
-
-```
+```text
+src/main/java/com/tasteradar
+├── ai            # Gemini LLM 기반 입맛 추천 및 캐싱 로직
+├── cart          # 장바구니 관리 기능
+├── menu          # 가게 메뉴 관리 (Owner 전용)
+├── notification  # 주문 현황 카카오톡 알림톡 발송 서비스
+├── order         # 주문 생성, 처리 및 사장님 대시보드 매출 통계
+├── payment       # 카카오페이(KakaoPay) 결제 연동 및 승인/취소
+├── review        # 리뷰 작성 및 리뷰 기반 맛 취향 데이터 집계 (QueryDSL)
+├── store         # 카카오 로컬 지오코딩 연동 매장 검색 및 정보 관리
+├── security      # JWT + Redis 연동 무상태 인증 시스템
+└── oauth         # 카카오 소셜 로그인 연동
 
