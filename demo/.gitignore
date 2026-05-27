@@ -41,3 +41,4 @@ out/
 # Local file uploads (runtime-generated binaries; directory kept via .gitkeep)
 uploads/*
 !uploads/.gitkeep
+docs/
