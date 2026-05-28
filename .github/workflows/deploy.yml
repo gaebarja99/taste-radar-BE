@@ -37,11 +37,30 @@ jobs:
           chmod 700 ~/.ssh
 
           # Secrets pasted from Windows often contain CRLF; strip \r to keep key valid.
-          printf '%s' "${{ secrets.DEPLOY_SSH_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
+          # Accept either:
+          # - raw PEM text (-----BEGIN ... PRIVATE KEY-----)
+          # - base64-encoded PEM (recommended if GitHub UI mangles newlines)
+          KEY="${{ secrets.DEPLOY_SSH_KEY }}"
+          if echo "$KEY" | grep -q "BEGIN .*PRIVATE KEY"; then
+            printf '%s' "$KEY" | tr -d '\r' > ~/.ssh/id_rsa
+          else
+            printf '%s' "$KEY" | tr -d '\r' | base64 -d > ~/.ssh/id_rsa
+          fi
           chmod 600 ~/.ssh/id_rsa
 
+          if [ ! -s ~/.ssh/id_rsa ]; then
+            echo "DEPLOY_SSH_KEY secret is empty or missing."
+            echo "GitHub repo Settings → Secrets and variables → Actions → Secrets 에 DEPLOY_SSH_KEY가 있는지 확인해줘."
+            exit 1
+          fi
+
           # Validate key format early to fail with a clear error.
-          ssh-keygen -y -f ~/.ssh/id_rsa >/dev/null
+          if ! ssh-keygen -y -f ~/.ssh/id_rsa >/dev/null 2>&1; then
+            echo "Invalid SSH private key format in DEPLOY_SSH_KEY."
+            echo "PEM 전체(-----BEGIN ... PRIVATE KEY----- ~ -----END ... PRIVATE KEY-----)를 줄바꿈 포함 그대로 붙였는지 확인해줘."
+            echo "만약 GitHub Secrets에서 줄바꿈이 깨지면, PEM을 base64로 인코딩해서 넣어도 돼."
+            exit 1
+          fi
 
           ssh-keyscan -H "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts
 
