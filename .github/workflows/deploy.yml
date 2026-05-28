@@ -36,6 +36,29 @@ jobs:
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
 
+          HOST="${{ secrets.DEPLOY_HOST }}"
+          USER="${{ secrets.DEPLOY_USER }}"
+          APP_DIR="${{ secrets.DEPLOY_APP_DIR }}"
+          SERVICE="${{ secrets.DEPLOY_SERVICE_NAME }}"
+
+          if [ -z "${HOST}" ]; then
+            echo "DEPLOY_HOST secret is empty or missing."
+            echo "EC2 콘솔에서 Public IPv4(또는 도메인)를 DEPLOY_HOST에 넣어줘. (172.31.x.x 같은 private IP 말고)"
+            exit 1
+          fi
+          if [ -z "${USER}" ]; then
+            echo "DEPLOY_USER secret is empty or missing. (예: ubuntu)"
+            exit 1
+          fi
+          if [ -z "${APP_DIR}" ]; then
+            echo "DEPLOY_APP_DIR secret is empty or missing. (예: /home/ubuntu)"
+            exit 1
+          fi
+          if [ -z "${SERVICE}" ]; then
+            echo "DEPLOY_SERVICE_NAME secret is empty or missing. (예: taste-radar)"
+            exit 1
+          fi
+
           # Secrets pasted from Windows often contain CRLF; strip \r to keep key valid.
           # Accept either:
           # - raw PEM text (-----BEGIN ... PRIVATE KEY-----)
@@ -62,7 +85,7 @@ jobs:
             exit 1
           fi
 
-          ssh-keyscan -H "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts
+          ssh-keyscan -H "${HOST}" >> ~/.ssh/known_hosts
 
       - name: Upload jar to server
         run: |
