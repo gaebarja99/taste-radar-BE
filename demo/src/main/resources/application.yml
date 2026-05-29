@@ -85,6 +85,8 @@ app:
   demo:
     # true 시 기동 시 강남역 주변 [데모] 가게·메뉴 자동 삽입 (이미 있으면 스킵)
     seed-enabled: ${DEMO_SEED_ENABLED:false}
+    # true 시 기존 [데모] 데이터 삭제 후 다시 시드 (이미지·리뷰 포함 버전으로 갱신할 때)
+    reset: ${DEMO_SEED_RESET:false}
     default-radius-km: ${DEMO_DEFAULT_RADIUS_KM:3}
   oauth-success-redirect: http://localhost:5173/pages/auth/callback.html
   ai:

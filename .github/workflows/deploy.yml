@@ -88,26 +88,23 @@ jobs:
           # Try to pre-trust host key (non-fatal). If this fails, scp/ssh will still show a clearer error later.
           ssh-keyscan -T 10 -H "${HOST}" >> ~/.ssh/known_hosts 2>/dev/null || true
 
-      - name: Upload jar to server
+      - name: Deploy jar to server
         run: |
+          set -euo pipefail
           JAR_PATH="$(ls build/libs/*.jar | head -n 1)"
           echo "Uploading: ${JAR_PATH}"
-          scp -i ~/.ssh/id_rsa \
-            -o ConnectTimeout=10 \
-            -o ServerAliveInterval=15 \
-            -o ServerAliveCountMax=3 \
-            -o StrictHostKeyChecking=no \
-            -o UserKnownHostsFile=/dev/null \
-            "${JAR_PATH}" "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.DEPLOY_APP_DIR }}/app.jar"
+          APP_DIR="${{ secrets.DEPLOY_APP_DIR }}"
+          SERVICE="${{ secrets.DEPLOY_SERVICE_NAME }}"
+          REMOTE="${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}"
+          SSH_COMMON="-i ~/.ssh/id_rsa -o ConnectTimeout=10 -o ServerAliveInterval=15 -o ServerAliveCountMax=3 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 
-      - name: Restart service
-        run: |
-          ssh -i ~/.ssh/id_rsa \
-            -o ConnectTimeout=10 \
-            -o ServerAliveInterval=15 \
-            -o ServerAliveCountMax=3 \
-            -o StrictHostKeyChecking=no \
-            -o UserKnownHostsFile=/dev/null \
-            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
-            "sudo systemctl restart ${{ secrets.DEPLOY_SERVICE_NAME }} && sudo systemctl status ${{ secrets.DEPLOY_SERVICE_NAME }} --no-pager -l"
+          # Upload to a temp file first, then swap atomically (avoids corrupted app.jar while service is running).
+          scp ${SSH_COMMON} "${JAR_PATH}" "${REMOTE}:${APP_DIR}/app.jar.new"
+          ssh ${SSH_COMMON} "${REMOTE}" bash -s <<EOF
+            set -euo pipefail
+            sudo systemctl stop ${SERVICE}
+            mv -f ${APP_DIR}/app.jar.new ${APP_DIR}/app.jar
+            sudo systemctl start ${SERVICE}
+            sudo systemctl is-active ${SERVICE}
+          EOF
 

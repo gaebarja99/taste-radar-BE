@@ -5,6 +5,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "app.demo")
 public record DemoProperties(
 		boolean seedEnabled,
+		boolean reset,
 		double defaultRadiusKm
 ) {
 	public double resolvedDefaultRadiusKm() {

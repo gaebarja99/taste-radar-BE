@@ -167,6 +167,7 @@ gradlew.bat bootRun
 | `KAKAO_PAY_CID` | 가맹점 CID (기본: 테스트 `TC0ONETIME`) |
 | `GEMINI_API_KEY` | Gemini API Key |
 | `DEMO_SEED_ENABLED` | `true` 시 기동 시 강남 `[데모]` 가게·메뉴 시드 (기본 `false`) |
+| `DEMO_SEED_RESET` | `true` 시 기존 `[데모]` 데이터 삭제 후 재시드 (기본 `false`) |
 | `DEMO_DEFAULT_RADIUS_KM` | 데모 API 기본 반경 km (기본 `3`) |
 | `UPLOAD_DIR` | 업로드 저장 경로 (기본: `./uploads`) |
 | `UPLOAD_PUBLIC_BASE_URL` | 업로드 파일 공개 URL prefix |
@@ -300,10 +301,13 @@ EC2 `app.env`에 한 줄 추가 후 서비스 재시작:
 
 ```bash
 DEMO_SEED_ENABLED=true
+# 이미 예전 시드를 넣었다면, 이미지·리뷰 포함 버전으로 다시 넣을 때:
+DEMO_SEED_RESET=true
 ```
 
-- `[데모]` 접두사 가게 5곳 + 메뉴가 **없을 때만** 삽입됩니다.
-- 이미 있으면 스킵합니다. 넣은 뒤에는 `false`로 바꿔도 됩니다.
+- 가게 **5곳**, 메뉴 **15개**, 가게당 **리뷰 6개**(맛 프로필 노출용), **가게·메뉴 사진 URL**(picsum)
+- `[데모]` 데이터가 **없을 때만** 삽입. 이미 있으면 스킵 (`DEMO_SEED_RESET=true`면 삭제 후 재삽입)
+- 넣은 뒤에는 `DEMO_SEED_ENABLED=false` 로 바꿔도 됩니다
 
 ### 프론트엔드 연동 (taste-radar-FE)
 

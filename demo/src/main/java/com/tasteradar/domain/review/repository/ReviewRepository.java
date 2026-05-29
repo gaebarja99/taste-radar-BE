@@ -16,6 +16,9 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
 	Page<Review> findByOrder_Store_IdOrderByCreatedAtDesc(Long storeId, Pageable pageable);
 
+	@Query("SELECT r FROM Review r WHERE r.order.store.id = :storeId")
+	List<Review> findAllByOrderStoreId(@Param("storeId") long storeId);
+
 	boolean existsByOrder_Id(Long orderId);
 
 	Optional<Review> findByIdAndUser_Id(Long id, Long userId);
