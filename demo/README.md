@@ -166,6 +166,8 @@ gradlew.bat bootRun
 | `KAKAO_PAY_ADMIN_KEY` | 카카오페이 Admin Key |
 | `KAKAO_PAY_CID` | 가맹점 CID (기본: 테스트 `TC0ONETIME`) |
 | `GEMINI_API_KEY` | Gemini API Key |
+| `DEMO_SEED_ENABLED` | `true` 시 기동 시 강남 `[데모]` 가게·메뉴 시드 (기본 `false`) |
+| `DEMO_DEFAULT_RADIUS_KM` | 데모 API 기본 반경 km (기본 `3`) |
 | `UPLOAD_DIR` | 업로드 저장 경로 (기본: `./uploads`) |
 | `UPLOAD_PUBLIC_BASE_URL` | 업로드 파일 공개 URL prefix |
 
@@ -278,6 +280,75 @@ src
 PENDING(주문 확인) → COOKING(조리 중) → DELIVERING(배달 중) → DELIVERED(배달 완료)
                   ↘ REJECTED(거절) / CANCELED(취소)
 ```
+
+---
+
+## Demo (포트폴리오 · 면접관용)
+
+면접관 위치를 미리 알 수 없으므로, **강남역 일대 고정 좌표**에 샘플 가게를 두고 프론트에서 **「데모: 강남역 주변」** 위치를 쓰도록 합니다.
+
+| 항목 | 값 |
+|------|-----|
+| 기준 좌표 | 위도 `37.497942`, 경도 `127.027621` (강남역) |
+| 기본 반경 | `3` km (`radiusKm`) |
+| 주변 가게 API | `GET /api/stores/nearby?lat=37.497942&lng=127.027621&radiusKm=3` |
+| 데모 메타 API | `GET /api/demo` · `GET /api/demo/locations` |
+
+### 운영 DB에 샘플 데이터 넣기
+
+EC2 `app.env`에 한 줄 추가 후 서비스 재시작:
+
+```bash
+DEMO_SEED_ENABLED=true
+```
+
+- `[데모]` 접두사 가게 5곳 + 메뉴가 **없을 때만** 삽입됩니다.
+- 이미 있으면 스킵합니다. 넣은 뒤에는 `false`로 바꿔도 됩니다.
+
+### 프론트엔드 연동 (taste-radar-FE)
+
+`GET /api/demo/locations` 응답 예:
+
+```json
+[
+  {
+    "id": "gangnam-station",
+    "label": "데모: 강남역 주변",
+    "lat": 37.497942,
+    "lng": 127.027621,
+    "radiusKm": 3,
+    "recommended": true
+  }
+]
+```
+
+버튼 클릭 시 세션에 저장 후 주변 가게를 다시 불러옵니다:
+
+```javascript
+const DEMO_SESSION_KEY = "tasteRadar.nearbySession";
+
+export async function applyDemoLocation(locationId = "gangnam-station") {
+  const res = await fetch("/api/demo/locations");
+  if (!res.ok) throw new Error("데모 위치를 불러오지 못했습니다.");
+  const locations = await res.json();
+  const loc =
+    locations.find((l) => l.id === locationId) ||
+    locations.find((l) => l.recommended) ||
+    locations[0];
+  sessionStorage.setItem(
+    DEMO_SESSION_KEY,
+    JSON.stringify({
+      lat: loc.lat,
+      lng: loc.lng,
+      radiusKm: loc.radiusKm,
+      savedAt: Date.now(),
+    })
+  );
+  return loc;
+}
+```
+
+메인/온보딩 화면에 **「데모: 강남역 주변」** 버튼을 두고 `applyDemoLocation()` 호출 후 기존 nearby 목록 로직을 실행하면 됩니다.
 
 ---
 

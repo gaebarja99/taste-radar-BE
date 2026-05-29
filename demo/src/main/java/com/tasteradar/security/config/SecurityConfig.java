@@ -72,6 +72,7 @@ public class SecurityConfig {
 									"/api/auth/refresh", "/api/auth/kakao/**",
 									"/api/auth/register", "/api/auth/login").permitAll()
 							.requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
+							.requestMatchers(HttpMethod.GET, "/api/demo", "/api/demo/**").permitAll()
 							.requestMatchers(HttpMethod.GET, "/api/stores/**").permitAll()
 							.requestMatchers("/api/owner/**").hasRole("OWNER")
 							.requestMatchers("/api/cart/**").hasRole("CUSTOMER")

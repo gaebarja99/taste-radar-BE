@@ -12,6 +12,8 @@ public interface StoreRepository extends JpaRepository<Store, Long>, StoreSearch
 
 	Optional<Store> findByIdAndOwner_Id(Long id, Long ownerId);
 
+	boolean existsByNameStartingWith(String prefix);
+
 	/**
 	 * 본인이 소유한 모든 가게(소프트 삭제 포함). {@code Store} 엔티티에
 	 * {@code @SQLRestriction} 이 없기 때문에 폐업 처리(is_deleted=true)된 가게도 함께 반환된다.

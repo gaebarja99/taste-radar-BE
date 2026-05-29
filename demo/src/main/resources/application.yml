@@ -82,6 +82,10 @@ app:
   # 운영 프론트(CloudFront 등) CORS. 콤마 구분 (SecurityConfig 기본 목록에 추가됨)
   # cors:
   #   allowed-origin-patterns: https://your-domain.com
+  demo:
+    # true 시 기동 시 강남역 주변 [데모] 가게·메뉴 자동 삽입 (이미 있으면 스킵)
+    seed-enabled: ${DEMO_SEED_ENABLED:false}
+    default-radius-km: ${DEMO_DEFAULT_RADIUS_KM:3}
   oauth-success-redirect: http://localhost:5173/pages/auth/callback.html
   ai:
     gemini-api-key: ${GEMINI_API_KEY:}

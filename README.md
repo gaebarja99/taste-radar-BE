@@ -12,6 +12,13 @@
 ![Service](https://img.shields.io/badge/Service-배달%20주문%20REST%20API-blue)
 ![Period](https://img.shields.io/badge/Period-2026.05.08~2026.05.17-green)
 
+## Demo
+
+- 샘플 가게/메뉴는 **서울 강남 일대(위도 `37.497942`, 경도 `127.027621`)** 기준으로 넣었습니다.
+- 접속 후 **「데모: 강남역 주변」**을 누르거나, 브라우저 위치를 허용하면 주변 가게를 볼 수 있습니다. (프론트 버튼은 FE 저장소 참고)
+- 위치 서비스는 Haversine 반경 검색 (`GET /api/stores/nearby`)으로 구현했습니다.
+- 데모 API: `GET /api/demo` · 시드: `DEMO_SEED_ENABLED=true` — 자세한 내용은 [`demo/README.md`](demo/README.md#demo-포트폴리오--면접관용) 참고.
+
 ---
 
 ## 📍 목차
