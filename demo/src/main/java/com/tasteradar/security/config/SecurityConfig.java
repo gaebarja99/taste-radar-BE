@@ -94,22 +94,34 @@ public class SecurityConfig {
 	}
 
 	/**
-	 * 프론트엔드(개발) origin 허용 설정.
+	 * 프론트엔드 origin 허용 설정.
 	 * - Vite dev: 5173 / 5174
 	 * - VS Code Live Server: 5500
-	 * 운영 도메인이 정해지면 여기 추가하세요.
+	 * - 운영: CloudFront (추가 도메인은 app.cors.allowed-origin-patterns)
 	 */
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration config = new CorsConfiguration();
-		config.setAllowedOriginPatterns(List.of(
+		var origins = new java.util.ArrayList<>(List.of(
 				"http://localhost:5173",
 				"http://localhost:5174",
 				"http://localhost:5500",
 				"http://127.0.0.1:5173",
 				"http://127.0.0.1:5174",
-				"http://127.0.0.1:5500"
+				"http://127.0.0.1:5500",
+				"https://d19bqtdupah4y8.cloudfront.net",
+				"https://*.cloudfront.net"
 		));
+		String extra = environment.getProperty("app.cors.allowed-origin-patterns");
+		if (extra != null && !extra.isBlank()) {
+			for (String pattern : extra.split(",")) {
+				String trimmed = pattern.trim();
+				if (!trimmed.isEmpty()) {
+					origins.add(trimmed);
+				}
+			}
+		}
+		config.setAllowedOriginPatterns(origins);
 		config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 		config.setAllowedHeaders(List.of("*"));
 		config.setExposedHeaders(List.of("Authorization", "Location"));

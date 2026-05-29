@@ -79,6 +79,9 @@ server:
 
 # 카카오 로그인 성공 후 프론트엔드 콜백 페이지(토큰을 fragment(#)로 전달)
 app:
+  # 운영 프론트(CloudFront 등) CORS. 콤마 구분 (SecurityConfig 기본 목록에 추가됨)
+  # cors:
+  #   allowed-origin-patterns: https://your-domain.com
   oauth-success-redirect: http://localhost:5173/pages/auth/callback.html
   ai:
     gemini-api-key: ${GEMINI_API_KEY:}
