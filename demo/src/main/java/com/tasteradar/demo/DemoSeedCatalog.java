@@ -157,7 +157,7 @@ public final class DemoSeedCatalog {
 				review(5, "반찬이 정말 깔끔해요. 집밥 느낌이 나서 좋았어요.", "sweet", null),
 				review(4, "된장찌개가 구수합니다. 밥 한 공기 뚝딱이에요.", "umami", "감사합니다! 다음에도 맛있게 드세요."),
 				review(5, "불고기 덮밥 양념이 제 스타일이에요.", "sweet", null),
-				review(4, "가격 대비 푸짐해요. 점심 특선 추천합니다.", "saltiness", null),
+				review(4, "가격 대비 푸짐해요. 점심 특선 추천합니다.", "salty", null),
 				review(5, "직원분이 친절하고 음식이 빨리 나왔어요.", "umami", null),
 				review(4, "매장이 깨끗하고 메뉴 사진이 실제랑 비슷해요.", "sweet", "리뷰 남겨주셔서 감사해요!")
 		);
@@ -165,21 +165,21 @@ public final class DemoSeedCatalog {
 
 	private static List<DemoReviewSeed> pastaReviews() {
 		return List.of(
-				review(5, "알리오 올리오 마늘 향이 좋아요.", "saltiness", null),
+				review(5, "알리오 올리오 마늘 향이 좋아요.", "salty", null),
 				review(4, "뇨끼가 쫄깃해요. 크림 소스가 진해요.", "umami", null),
 				review(5, "피자 도우가 얇고 바삭해서 만족!", "sweet", "다음에도 환영합니다 :)"),
 				review(4, "데이트하기 좋은 분위기예요.", "sweet", null),
 				review(4, "양이 넉넉하고 플레이팅이 예뻐요.", "umami", null),
-				review(5, "강남역에서 이 정도 파스타면 충분히 재방문!", "saltiness", null)
+				review(5, "강남역에서 이 정도 파스타면 충분히 재방문!", "salty", null)
 		);
 	}
 
 	private static List<DemoReviewSeed> kimbapReviews() {
 		return List.of(
-				review(5, "참치김밥은 여기가 제일 맛있어요.", "saltiness", null),
+				review(5, "참치김밥은 여기가 제일 맛있어요.", "salty", null),
 				review(4, "라볶이 매콤달콤 딱 좋아요.", "sweet", null),
-				review(4, "잔치국수 국물이 시원해요.", "sourness", "자주 찾아주세요!"),
-				review(5, "가성비 최고, 포장도 깔끔합니다.", "saltiness", null),
+				review(4, "잔치국수 국물이 시원해요.", "sour", "자주 찾아주세요!"),
+				review(5, "가성비 최고, 포장도 깔끔합니다.", "salty", null),
 				review(4, "바쁜 점심에 빠르게 먹기 좋아요.", "umami", null),
 				review(4, "김밥 속 재료가 신선해요.", "sweet", null)
 		);
@@ -188,9 +188,9 @@ public final class DemoSeedCatalog {
 	private static List<DemoReviewSeed> burgerReviews() {
 		return List.of(
 				review(5, "패티 육즙이 살아있어요. 번도 부드러워요.", "umami", null),
-				review(4, "감자튀김 바삭하고 짜지 않아요.", "saltiness", null),
+				review(4, "감자튀김 바삭하고 짜지 않아요.", "salty", null),
 				review(5, "더블 치즈버거 치즈가 듬뿍!", "umami", "치즈 덕후 환영합니다"),
-				review(4, "포장 상태도 좋았어요.", "saltiness", null),
+				review(4, "포장 상태도 좋았어요.", "salty", null),
 				review(4, "양이 많아서 배부르게 먹었습니다.", "sweet", null),
 				review(5, "강남역 버거 맛집으로 추천!", "umami", null)
 		);

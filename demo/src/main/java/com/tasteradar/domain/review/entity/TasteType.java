@@ -15,10 +15,10 @@ public enum TasteType {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "맛을 선택해 주세요.");
 		}
 		return switch (key.trim().toLowerCase()) {
-			case "sweet" -> SWEET;
-			case "salty" -> SALTY;
-			case "sour" -> SOUR;
-			case "bitter" -> BITTER;
+			case "sweet", "sweetness" -> SWEET;
+			case "salty", "saltiness" -> SALTY;
+			case "sour", "sourness" -> SOUR;
+			case "bitter", "bitterness" -> BITTER;
 			case "umami" -> UMAMI;
 			default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "올바르지 않은 맛 값입니다: " + key);
 		};
