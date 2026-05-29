@@ -71,7 +71,7 @@ public class SecurityConfig {
 							.requestMatchers("/oauth2/**", "/login/oauth2/**", "/error",
 									"/api/auth/refresh", "/api/auth/kakao/**",
 									"/api/auth/register", "/api/auth/login").permitAll()
-							.requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
+							.requestMatchers("/uploads/**").permitAll()
 							.requestMatchers(HttpMethod.GET, "/api/demo", "/api/demo/**").permitAll()
 							.requestMatchers(HttpMethod.GET, "/api/stores/**").permitAll()
 							.requestMatchers("/api/owner/**").hasRole("OWNER")
