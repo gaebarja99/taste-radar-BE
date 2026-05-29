@@ -42,6 +42,7 @@ public class DemoDataSeeder implements ApplicationRunner {
 	private static final AtomicInteger ORDER_SEQ = new AtomicInteger(1);
 
 	private final DemoProperties demoProperties;
+	private final DemoStoreDataCleaner demoStoreDataCleaner;
 	private final UserRepository userRepository;
 	private final StoreRepository storeRepository;
 	private final MenuRepository menuRepository;
@@ -112,21 +113,15 @@ public class DemoDataSeeder implements ApplicationRunner {
 	}
 
 	private void clearDemoData() {
-		List<Store> stores = storeRepository.findAllByNameStartingWith(DemoSeedCatalog.STORE_NAME_PREFIX);
-		if (stores.isEmpty()) {
+		int clearedStores = demoStoreDataCleaner.hardDeleteAllDemoStores();
+		if (clearedStores == 0) {
 			return;
-		}
-		for (Store store : stores) {
-			reviewRepository.deleteAll(reviewRepository.findAllByOrderStoreId(store.getId()));
-			foodOrderRepository.deleteAll(foodOrderRepository.findByStore_Id(store.getId()));
-			menuRepository.deleteAll(menuRepository.findByStoreId(store.getId()));
-			storeRepository.delete(store);
 		}
 		for (int i = 1; i <= 12; i++) {
 			userRepository.findByEmail(DemoSeedCatalog.DEMO_CUSTOMER_EMAIL_PREFIX + i + "@taste-radar.portfolio")
 					.ifPresent(userRepository::delete);
 		}
-		log.info("[demo-seed] cleared {} demo stores and related data", stores.size());
+		log.info("[demo-seed] cleared {} demo stores and related data (hard delete for reset)", clearedStores);
 	}
 
 	private User createDemoOwner() {
