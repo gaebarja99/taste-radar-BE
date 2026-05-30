@@ -12,10 +12,13 @@
 ![Service](https://img.shields.io/badge/Service-배달%20주문%20REST%20API-blue)
 ![Period](https://img.shields.io/badge/Period-2026.05.08~2026.05.17-green)
 
-## Demo
-강남역 주변 버튼을 누르면 가게를 확인할 수 있습니다
-test 용 사장 id: demo-owner@taste-radar.portfolio
-사장 비빌번호 : Demo1234a
+## 📡Demo
+
+> 📍 상단의 <img src="https://github.com/user-attachments/assets/e79cc4dc-9fb7-4dc6-87c4-bb30dd1c261b" width="120" valign="middle" /> 버튼을 누르면 강남역 주변의 가게들을 바로 확인할 수 있습니다.
+> 
+> 👤 **테스트용 사장님 계정**
+> - **ID:** `demo-owner@taste-radar.portfolio`
+> - **PW:** `Demo1234a`
 
 ---
 
