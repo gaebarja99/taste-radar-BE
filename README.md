@@ -6,6 +6,7 @@
 리뷰에 **5가지 맛(단·짠·신·쓴·감칠)** 평가를 남기면 가게·사용자 입맛 프로필이 쌓이고, **Gemini AI**로 메뉴 추천과 맛 오각형 통계를 제공합니다. **카카오 로그인·카카오페이·카카오톡 주문 알림**을 연동했습니다.
 
 ### 🔗 관련 산출물
+**[Live Demo (배포)](https://d19bqtdupah4y8.cloudfront.net/)**<br>
 [![Frontend Repository](https://img.shields.io/badge/Frontend_Repo-61DAFB?style=flat-square&logo=react&logoColor=black)](https://github.com/gaebarja99/taste-radar-FE.git) [![Presentation PPT](https://img.shields.io/badge/Presentation_PPT-D14836?style=flat-square)](https://canva.link/q7ztzu8r36yatno)
 
 ![Project](https://img.shields.io/badge/Project-TasteRadar%20(Backend)-orange)
